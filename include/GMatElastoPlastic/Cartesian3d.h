@@ -184,6 +184,7 @@ public:
 
   // Shape
 
+  size_t ndim() const;
   size_t nelem() const;
   size_t nip() const;
 
@@ -251,8 +252,8 @@ public:
           xt::xtensor<double,4>& Sig,
           xt::xtensor<double,6>& C);
 
-  void epsp(
-          xt::xtensor<double,2>& epsp) const;
+  void epsp(xt::xtensor<double,2>& epsp) const;
+  void increment();
 
   // Auto-allocation of the functions above
 
