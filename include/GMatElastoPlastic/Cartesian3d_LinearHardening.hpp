@@ -55,7 +55,7 @@ inline void LinearHardening::stress(const T2& Eps, T&& Sig)
   // strain increment
   T2 dEps = Eps - m_Eps_t;
 
-  // trial elastic strain
+  // trial elastic strain: presume the strain increment to be fully elastic
   xt::noalias(m_Epse) = m_Epse_t + dEps;
 
   // decompose trial elastic strain
@@ -114,7 +114,7 @@ inline void LinearHardening::tangent(const T2& Eps, T&& Sig, S&& C)
   // strain increment
   T2 dEps = Eps - m_Eps_t;
 
-  // trial elastic strain
+  // trial elastic strain: presume the strain increment to be fully elastic
   xt::noalias(m_Epse) = m_Epse_t + dEps;
 
   // decompose trial elastic strain

@@ -154,6 +154,7 @@ py::class_<SM::Matrix>(sm, "Matrix")
     py::arg("nip")
   )
 
+  .def("ndim", &SM::Matrix::ndim)
   .def("nelem", &SM::Matrix::nelem)
   .def("nip", &SM::Matrix::nip)
 
@@ -178,7 +179,7 @@ py::class_<SM::Matrix>(sm, "Matrix")
     py::arg("K"),
     py::arg("G"))
 
-  .def("setLinearHar dening",
+  .def("setLinearHardening",
     py::overload_cast<
       const xt::xtensor<size_t,2>&,
       double,
@@ -217,13 +218,10 @@ py::class_<SM::Matrix>(sm, "Matrix")
     py::arg("epsy0"),
     py::arg("H"))
 
-  .def("Stress",
-    py::overload_cast<const xt::xtensor<double,4> &>(&SM::Matrix::Stress),
-    py::arg("Eps"))
-
-  .def("Tangent",
-    py::overload_cast<const xt::xtensor<double,4> &>(&SM::Matrix::Tangent),
-    py::arg("Eps"))
+  .def("increment", &SM::Matrix::increment)
+  .def("Stress", &SM::Matrix::Stress, py::arg("Eps"))
+  .def("Tangent", &SM::Matrix::Tangent, py::arg("Eps"))
+  .def("Epsp", &SM::Matrix::Epsp)
 
   .def("__repr__", [](const SM::Matrix &){
     return "<GMatElastoPlastic.Cartesian3d.Matrix>"; });

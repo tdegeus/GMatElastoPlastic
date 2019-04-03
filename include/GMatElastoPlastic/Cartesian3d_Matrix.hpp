@@ -23,6 +23,13 @@ inline Matrix::Matrix(size_t nelem, size_t nip) : m_nelem(nelem), m_nip(nip)
 
 // -------------------------------------------------------------------------------------------------
 
+inline size_t Matrix::ndim() const
+{
+  return m_ndim;
+}
+
+// -------------------------------------------------------------------------------------------------
+
 inline size_t Matrix::nelem() const
 {
   return m_nelem;
@@ -356,6 +363,42 @@ inline void Matrix::tangent(
       switch (m_type(e,q)) {
         case Type::Elastic:         m_Elastic        [m_index(e,q)].tangent(Eps, Sig, C); break;
         case Type::LinearHardening: m_LinearHardening[m_index(e,q)].tangent(Eps, Sig, C); break;
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline void Matrix::epsp(xt::xtensor<double,2>& epsp) const
+{
+  GMATELASTOPLASTIC_ASSERT(m_allSet);
+  GMATELASTOPLASTIC_ASSERT(epsp.shape() == \
+    std::decay_t<decltype(epsp)>::shape_type({m_nelem, m_nip}));
+
+  #pragma omp parallel for
+  for (size_t e = 0; e < m_nelem; ++e) {
+    for (size_t q = 0; q < m_nip; ++q) {
+      switch (m_type(e,q)) {
+        case Type::Elastic:         epsp(e,q) = m_Elastic        [m_index(e,q)].epsp(); break;
+        case Type::LinearHardening: epsp(e,q) = m_LinearHardening[m_index(e,q)].epsp(); break;
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+inline void Matrix::increment()
+{
+  GMATELASTOPLASTIC_ASSERT(m_allSet);
+
+  #pragma omp parallel for
+  for (size_t e = 0; e < m_nelem; ++e) {
+    for (size_t q = 0; q < m_nip; ++q) {
+      switch (m_type(e,q)) {
+        case Type::Elastic:         m_Elastic        [m_index(e,q)].increment(); break;
+        case Type::LinearHardening: m_LinearHardening[m_index(e,q)].increment(); break;
       }
     }
   }
