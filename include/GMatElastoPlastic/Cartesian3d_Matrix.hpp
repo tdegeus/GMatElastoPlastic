@@ -256,7 +256,7 @@ inline void Matrix::setLinearHardening(
       if (I(e,q) == 1ul) {
         m_type(e,q) = Type::LinearHardening;
         m_index(e,q) = m_LinearHardening.size();
-        m_LinearHardening.push_back(LinearHardening(K, G, H, sigy0));
+        m_LinearHardening.push_back(LinearHardening(K, G, sigy0, H));
       }
     }
   }

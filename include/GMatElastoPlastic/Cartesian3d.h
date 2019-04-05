@@ -145,7 +145,7 @@ private:
 
   double m_K;     // bulk modulus
   double m_G;     // shear modulus
-  double m_sigy0; // initial shear stress
+  double m_sigy0; // initial yield stress
   double m_H;     // hardening modulus
 
   // plastic strain

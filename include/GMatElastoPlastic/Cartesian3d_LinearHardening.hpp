@@ -75,10 +75,12 @@ inline void LinearHardening::stress(const T2& Eps, T&& Sig)
   if ( phi > 0 ) {
     // - plastic flow
     double dgamma = phi / (3.0 * m_G + m_H);
-    // - update stress, elastic strain, and equivalent plastic strain
-    xt::noalias(Sigd) = (1.0 - 3.0 * m_G * dgamma / sigeq) * Sigd;
+    // - update trial stress (only the deviatoric part)
+    Sigd *= (1.0 - 3.0 * m_G * dgamma / sigeq);
+    // - update trial elastic strain (only the deviatoric part)
     xt::noalias(Epsed) = Sigd / (2.0 * m_G);
     xt::noalias(m_Epse) = epsem * I + Epsed;
+    // - update equivalent plastic strain
     m_epsp = m_epsp_t + dgamma;
   }
 
@@ -134,10 +136,12 @@ inline void LinearHardening::tangent(const T2& Eps, T&& Sig, S&& C)
     // - plastic flow (direction)
     double dgamma = phi / (3.0 * m_G + m_H);
     T2 N = 1.5 * Sigd / sigeq;
-    // - update stress, elastic strain, and equivalent plastic strain
-    xt::noalias(Sigd) = (1.0 - 3.0 * m_G * dgamma / sigeq) * Sigd;
+    // - update trial stress (only the deviatoric part)
+    Sigd *= (1.0 - 3.0 * m_G * dgamma / sigeq);
+    // - update trial elastic strain (only the deviatoric part)
     xt::noalias(Epsed) = Sigd / (2.0 * m_G);
     xt::noalias(m_Epse) = epsem * I + Epsed;
+    // - update equivalent plastic strain
     m_epsp = m_epsp_t + dgamma;
     // - update tangent
     T4 NN;
