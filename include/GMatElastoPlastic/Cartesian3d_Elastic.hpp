@@ -35,7 +35,7 @@ inline double Elastic::G() const
 // -------------------------------------------------------------------------------------------------
 
 template <class T>
-inline void Elastic::stress(const T2& Eps, T&& Sig) const
+inline void Elastic::stress(const Tensor2& Eps, T&& Sig) const
 {
   auto I    = Cartesian3d::I();
   auto epsm = trace(Eps) / 3.0;
@@ -45,9 +45,9 @@ inline void Elastic::stress(const T2& Eps, T&& Sig) const
 
 // -------------------------------------------------------------------------------------------------
 
-inline T2 Elastic::Stress(const T2& Eps) const
+inline Tensor2 Elastic::Stress(const Tensor2& Eps) const
 {
-  T2 Sig;
+  Tensor2 Sig;
   this->stress(Eps, Sig);
   return Sig;
 }
@@ -55,7 +55,7 @@ inline T2 Elastic::Stress(const T2& Eps) const
 // -------------------------------------------------------------------------------------------------
 
 template <class T, class S>
-inline void Elastic::tangent(const T2& Eps, T&& Sig, S&& C) const
+inline void Elastic::tangent(const Tensor2& Eps, T&& Sig, S&& C) const
 {
   auto I    = Cartesian3d::I();
   auto II   = Cartesian3d::II();
@@ -68,10 +68,10 @@ inline void Elastic::tangent(const T2& Eps, T&& Sig, S&& C) const
 
 // -------------------------------------------------------------------------------------------------
 
-inline std::tuple<T2,T4> Elastic::Tangent(const T2& Eps) const
+inline std::tuple<Tensor2,Tensor4> Elastic::Tangent(const Tensor2& Eps) const
 {
-  T2 Sig;
-  T4 C;
+  Tensor2 Sig;
+  Tensor4 C;
   this->tangent(Eps, Sig, C);
   return std::make_tuple(Sig, C);
 }

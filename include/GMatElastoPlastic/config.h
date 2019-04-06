@@ -29,11 +29,6 @@
 
 // -------------------------------------------------------------------------------------------------
 
-// dummy operation that can be use to suppress the "unused parameter" warnings
-#define UNUSED(p) ( (void)(p) )
-
-// -------------------------------------------------------------------------------------------------
-
 #ifndef NDEBUG
 #define GMATELASTOPLASTIC_ENABLE_ASSERT
 #endif

@@ -16,54 +16,46 @@ namespace Cartesian3d {
 
 // Alias
 
-using T2 = xt::xtensor_fixed<double, xt::xshape<3,3>>;
-using T4 = xt::xtensor_fixed<double, xt::xshape<3,3,3,3>>;
-
-// Tensor operations
-
-template <class T> inline double trace (const T& A);
-template <class T> inline double ddot22(const T& A, const T& B);
-
-template <class T2, class T4>
-inline void dyadic22(const T2& A, const T2& B, T4& C);
+using Tensor2 = xt::xtensor_fixed<double, xt::xshape<3,3>>;
+using Tensor4 = xt::xtensor_fixed<double, xt::xshape<3,3,3,3>>;
 
 // Unit tensors
 
-inline T2 I();
-inline T4 II();
-inline T4 I4();
-inline T4 I4rt();
-inline T4 I4s();
-inline T4 I4d();
+inline Tensor2 I();
+inline Tensor4 II();
+inline Tensor4 I4();
+inline Tensor4 I4rt();
+inline Tensor4 I4s();
+inline Tensor4 I4d();
 
 // -------------------------------------------------------------------------------------------------
 
 // Hydrostatic stress/strain
 
-inline double Hydrostatic(const T2& A);
+inline double Hydrostatic(const Tensor2& A);
 
 // Deviatoric part of a tensor
 
-inline T2 Deviatoric(const T2& A);
+inline Tensor2 Deviatoric(const Tensor2& A);
 
 // Equivalent deviatoric stress/stress
 
-inline double Sigeq(const T2& Sig);
-inline double Epseq(const T2& Eps);
+inline double Sigeq(const Tensor2& Sig);
+inline double Epseq(const Tensor2& Eps);
 
 // Matrix version of the functions above (no allocation)
 
-inline void hydrostatic(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Am);
-inline void deviatoric(const xt::xtensor<double,4>& A, xt::xtensor<double,4>& Ad);
-inline void sigeq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq);
-inline void epseq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq);
+inline void hydrostatic(const xt::xtensor<double,4>& A  , xt::xtensor<double,2>& Am   );
+inline void deviatoric (const xt::xtensor<double,4>& A  , xt::xtensor<double,4>& Ad   );
+inline void sigeq      (const xt::xtensor<double,4>& Sig, xt::xtensor<double,2>& Sigeq);
+inline void epseq      (const xt::xtensor<double,4>& Eps, xt::xtensor<double,2>& Epseq);
 
 // Auto-allocation allocation of the functions above
 
-inline xt::xtensor<double,2> Hydrostatic(const xt::xtensor<double,4>& A);
-inline xt::xtensor<double,4> Deviatoric(const xt::xtensor<double,4>& A);
-inline xt::xtensor<double,2> Sigeq(const xt::xtensor<double,4>& Sig);
-inline xt::xtensor<double,2> Epseq(const xt::xtensor<double,4>& Eps);
+inline xt::xtensor<double,2> Hydrostatic(const xt::xtensor<double,4>& A  );
+inline xt::xtensor<double,4> Deviatoric (const xt::xtensor<double,4>& A  );
+inline xt::xtensor<double,2> Sigeq      (const xt::xtensor<double,4>& Sig);
+inline xt::xtensor<double,2> Epseq      (const xt::xtensor<double,4>& Eps);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -80,18 +72,18 @@ public:
   double G() const;
 
   // Stress (no allocation, overwrites "Sig")
-  template <class T>
-  void stress(const T2& Eps, T&& Sig) const;
+  template <class U>
+  void stress(const Tensor2& Eps, U&& Sig) const;
 
   // Stress (auto allocation)
-  T2 Stress(const T2& Eps) const;
+  Tensor2 Stress(const Tensor2& Eps) const;
 
   // Stress & Tangent (no allocation, overwrites "Sig" and "C")
-  template <class T, class S>
-  void tangent(const T2& Eps, T&& Sig, S&& C) const;
+  template <class U, class V>
+  void tangent(const Tensor2& Eps, U&& Sig, V&& C) const;
 
   // Stress & Tangent (auto allocation)
-  std::tuple<T2,T4> Tangent(const T2& Eps) const;
+  std::tuple<Tensor2,Tensor4> Tangent(const Tensor2& Eps) const;
 
   // Increment (does nothing)
   void increment() const;
@@ -122,18 +114,18 @@ public:
   double H() const;
 
   // Stress (no allocation, overwrites "Sig")
-  template <class T>
-  void stress(const T2& Eps, T&& Sig);
+  template <class U>
+  void stress(const Tensor2& Eps, U&& Sig);
 
   // Stress (auto allocation)
-  T2 Stress(const T2& Eps);
+  Tensor2 Stress(const Tensor2& Eps);
 
   // Stress & Tangent (no allocation, overwrites "Sig" and "C")
-  template <class T, class S>
-  void tangent(const T2& Eps, T&& Sig, S&& C);
+  template <class U, class V>
+  void tangent(const Tensor2& Eps, U&& Sig, V&& C);
 
   // Stress & Tangent (auto allocation)
-  std::tuple<T2,T4> Tangent(const T2& Eps);
+  std::tuple<Tensor2,Tensor4> Tangent(const Tensor2& Eps);
 
   // Increment (update plastic strain)
   void increment();
@@ -149,16 +141,16 @@ private:
   double m_H;     // hardening modulus
 
   // plastic strain
-  double m_epsp=0.0;
-  double m_epsp_t=0.0;
+  double m_epsp   = 0.0;
+  double m_epsp_t = 0.0;
 
   // elastic strain tensor
-  T2 m_Epse=T2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
-  T2 m_Epse_t=T2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
+  Tensor2 m_Epse   = Tensor2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
+  Tensor2 m_Epse_t = Tensor2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
 
   // strain tensor
-  T2 m_Eps=T2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
-  T2 m_Eps_t=T2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
+  Tensor2 m_Eps    = Tensor2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
+  Tensor2 m_Eps_t  = Tensor2({{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}});
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -252,7 +244,12 @@ public:
           xt::xtensor<double,4>& Sig,
           xt::xtensor<double,6>& C);
 
+  // Extract information
+
   void epsp(xt::xtensor<double,2>& epsp) const;
+
+  // Update history of all material points
+
   void increment();
 
   // Auto-allocation of the functions above
@@ -263,7 +260,7 @@ public:
   std::tuple<xt::xtensor<double,4>,xt::xtensor<double,6>> Tangent(
     const xt::xtensor<double,4>& Eps);
 
-  xt::xtensor<double,4> Epsp() const;
+  xt::xtensor<double,2> Epsp() const;
 
 private:
 
@@ -285,6 +282,24 @@ private:
   void checkAllSet();
 
 };
+
+// -------------------------------------------------------------------------------------------------
+// Internal support functions
+// -------------------------------------------------------------------------------------------------
+
+// Trace: "c = A_ii"
+template <class U>
+inline double trace(const U& A);
+
+// Dyadic product
+template <class U, class V, class W>
+inline void A2_dyadic_B2(const U& A, const V& B, W& C);
+
+// Tensor contraction: "c = A_ij * B_ji"
+// Symmetric tensors only, no assertion
+template <class U, class V>
+inline double A2_ddot_B2(const U& A, const V& B);
+
 
 // -------------------------------------------------------------------------------------------------
 

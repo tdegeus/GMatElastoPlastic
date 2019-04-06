@@ -14,51 +14,18 @@ namespace Cartesian3d {
 
 // -------------------------------------------------------------------------------------------------
 
-template<class T>
-inline double trace(const T& A)
+inline Tensor2 I()
 {
-  return A(0,0) + A(1,1) + A(2,2);
+  return Tensor2({{1.0, 0.0, 0.0},
+                  {0.0, 1.0, 0.0},
+                  {0.0, 0.0, 1.0}});
 }
 
 // -------------------------------------------------------------------------------------------------
 
-template <class T>
-inline double ddot22(const T& A, const T& B)
+inline Tensor4 II()
 {
-  return A(0,0) * B(0,0) + 2.0 * A(0,1) * B(0,1) + 2.0 * A(0,2) * B(0,2) +
-         A(1,1) * B(1,1) + 2.0 * A(1,2) * B(1,2) +
-         A(2,2) * B(2,2);
-}
-
-// -------------------------------------------------------------------------------------------------
-
-template <class T2, class T4>
-inline void dyadic22(const T2& A, const T2& B, T4& C)
-{
-  C.fill(0.0);
-
-  for (size_t i = 0; i < 3; ++i)
-    for (size_t j = 0; j < 3; ++j)
-      for (size_t k = 0; k < 3; ++k)
-        for (size_t l = 0; l < 3; ++l)
-          C(i,j,k,l) += A(i,j) * B(k,l);
-}
-
-// -------------------------------------------------------------------------------------------------
-
-inline T2 I()
-{
-  return T2({{1., 0., 0.},
-             {0., 1., 0.},
-             {0., 0., 1.}});
-}
-
-// -------------------------------------------------------------------------------------------------
-
-inline T4 II()
-{
-  T4 out;
-
+  Tensor4 out;
   out.fill(0.0);
 
   for (size_t i = 0; i < 3; ++i)
@@ -66,17 +33,16 @@ inline T4 II()
       for (size_t k = 0; k < 3; ++k)
         for (size_t l = 0; l < 3; ++l)
           if (i == j and k == l)
-            out(i,j,k,l) = 1.;
+            out(i,j,k,l) = 1.0;
 
   return out;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline T4 I4()
+inline Tensor4 I4()
 {
-  T4 out;
-
+  Tensor4 out;
   out.fill(0.0);
 
   for (size_t i = 0; i < 3; ++i)
@@ -84,17 +50,16 @@ inline T4 I4()
       for (size_t k = 0; k < 3; ++k)
         for (size_t l = 0; l < 3; ++l)
           if (i == l and j == k)
-            out(i,j,k,l) = 1.;
+            out(i,j,k,l) = 1.0;
 
   return out;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline T4 I4rt()
+inline Tensor4 I4rt()
 {
-  T4 out;
-
+  Tensor4 out;
   out.fill(0.0);
 
   for (size_t i = 0; i < 3; ++i)
@@ -102,53 +67,53 @@ inline T4 I4rt()
       for (size_t k = 0; k < 3; ++k)
         for (size_t l = 0; l < 3; ++l)
           if (i == k and j == l)
-            out(i,j,k,l) = 1.;
+            out(i,j,k,l) = 1.0;
 
   return out;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline T4 I4s()
+inline Tensor4 I4s()
 {
-  return .5 * ( I4() + I4rt() );
+  return 0.5 * ( I4() + I4rt() );
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline T4 I4d()
+inline Tensor4 I4d()
 {
   return I4s() - II() / 3.0;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline double Hydrostatic(const T2& A)
+inline double Hydrostatic(const Tensor2& A)
 {
   return trace(A) / 3.0;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline T2 Deviatoric(const T2& A)
+inline Tensor2 Deviatoric(const Tensor2& A)
 {
   return A - trace(A) / 3.0 * I();
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline double Epseq(const T2& Eps)
+inline double Epseq(const Tensor2& Eps)
 {
-  T2 Epsd = Eps - trace(Eps) / 3.0 * I();
-  return std::sqrt(2.0/3.0 * ddot22(Epsd,Epsd));
+  Tensor2 Epsd = Eps - trace(Eps) / 3.0 * I();
+  return std::sqrt(2.0/3.0 * A2_ddot_B2(Epsd,Epsd));
 }
 
 // -------------------------------------------------------------------------------------------------
 
-inline double Sigeq(const T2& Sig)
+inline double Sigeq(const Tensor2& Sig)
 {
-  T2 Sigd = Sig - trace(Sig) / 3.0 * I();
-  return std::sqrt(1.5 * ddot22(Sigd,Sigd));
+  Tensor2 Sigd = Sig - trace(Sig) / 3.0 * I();
+  return std::sqrt(1.5 * A2_ddot_B2(Sigd,Sigd));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -179,7 +144,7 @@ inline void deviatoric(const xt::xtensor<double,4>& A, xt::xtensor<double,4>& Ad
 
   #pragma omp parallel
   {
-    T2 I = Cartesian3d::I();
+    Tensor2 I = Cartesian3d::I();
     #pragma omp for
     for (size_t e = 0; e < A.shape()[0]; ++e) {
       for (size_t q = 0; q < A.shape()[1]; ++q) {
@@ -200,13 +165,13 @@ inline void epseq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq)
 
   #pragma omp parallel
   {
-    T2 I = Cartesian3d::I();
+    Tensor2 I = Cartesian3d::I();
     #pragma omp for
     for (size_t e = 0; e < A.shape()[0]; ++e) {
       for (size_t q = 0; q < A.shape()[1]; ++q) {
         auto Ai  = xt::adapt(&A(e,q,0,0), xt::xshape<3,3>());
         auto Aid = Ai - trace(Ai) / 3.0 * I;
-        Aeq(e,q) = std::sqrt(2.0/3.0 * ddot22(Aid,Aid));
+        Aeq(e,q) = std::sqrt(2.0/3.0 * A2_ddot_B2(Aid,Aid));
       }
     }
   }
@@ -221,13 +186,13 @@ inline void sigeq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq)
 
   #pragma omp parallel
   {
-    T2 I = Cartesian3d::I();
+    Tensor2 I = Cartesian3d::I();
     #pragma omp for
     for (size_t e = 0; e < A.shape()[0]; ++e) {
       for (size_t q = 0; q < A.shape()[1]; ++q) {
         auto Ai  = xt::adapt(&A(e,q,0,0), xt::xshape<3,3>());
         auto Aid = Ai - trace(Ai) / 3.0 * I;
-        Aeq(e,q) = std::sqrt(1.5 * ddot22(Aid,Aid));
+        Aeq(e,q) = std::sqrt(1.5 * A2_ddot_B2(Aid,Aid));
       }
     }
   }
@@ -267,6 +232,38 @@ inline xt::xtensor<double,2> Sigeq(const xt::xtensor<double,4>& A)
   xt::xtensor<double,2> Aeq = xt::empty<double>({A.shape()[0], A.shape()[1]});
   Cartesian3d::sigeq(A, Aeq);
   return Aeq;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template <class U>
+inline double trace(const U& A)
+{
+  return A(0,0) + A(1,1) + A(2,2);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template <class U, class V, class W>
+inline void A2_dyadic_B2(const U& A, const V& B, W& C)
+{
+  C.fill(0.0);
+
+  for (size_t i = 0; i < 3; ++i)
+    for (size_t j = 0; j < 3; ++j)
+      for (size_t k = 0; k < 3; ++k)
+        for (size_t l = 0; l < 3; ++l)
+          C(i,j,k,l) += A(i,j) * B(k,l);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template <class U, class V>
+inline double A2_ddot_B2(const U& A, const V& B)
+{
+  return A(0,0) * B(0,0) + 2.0 * A(0,1) * B(0,1) + 2.0 * A(0,2) * B(0,2) +
+         A(1,1) * B(1,1) + 2.0 * A(1,2) * B(1,2) +
+         A(2,2) * B(2,2);
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -31,9 +31,6 @@ py::module sm = m.def_submodule("Cartesian3d", "3d Cartesian coordinates");
 // abbreviate name-space
 namespace SM = GMatElastoPlastic::Cartesian3d;
 
-// abbreviate types(s)
-typedef SM::T2 T2;
-
 // -------------------------------------------------------------------------------------------------
 
 sm.def("I", &SM::I);
@@ -46,22 +43,22 @@ sm.def("I4d", &SM::I4d);
 // -------------------------------------------------------------------------------------------------
 
 sm.def("Hydrostatic",
-  py::overload_cast<const T2&>(&SM::Hydrostatic),
+  py::overload_cast<const SM::Tensor2&>(&SM::Hydrostatic),
   "Hydrostatic part of a 2nd-order tensor",
   py::arg("A"));
 
 sm.def("Deviatoric",
-  py::overload_cast<const T2&>(&SM::Deviatoric),
+  py::overload_cast<const SM::Tensor2&>(&SM::Deviatoric),
   "Deviatoric",
   py::arg("A"));
 
 sm.def("Epseq",
-  py::overload_cast<const T2&>(&SM::Epseq),
+  py::overload_cast<const SM::Tensor2&>(&SM::Epseq),
   "Equivalent strain deviator",
   py::arg("Eps"));
 
 sm.def("Sigeq",
-  py::overload_cast<const T2&>(&SM::Sigeq),
+  py::overload_cast<const SM::Tensor2&>(&SM::Sigeq),
   "Equivalent stress deviator",
   py::arg("Sig"));
 
