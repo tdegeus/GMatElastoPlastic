@@ -21,7 +21,7 @@ using Tensor4 = xt::xtensor_fixed<double, xt::xshape<3,3,3,3>>;
 
 // Unit tensors
 
-inline Tensor2 I();
+inline Tensor2 I2();
 inline Tensor4 II();
 inline Tensor4 I4();
 inline Tensor4 I4rt();
@@ -192,7 +192,7 @@ public:
 
   // Matrix of unit tensors
 
-  xt::xtensor<double,4> I() const;
+  xt::xtensor<double,4> I2() const;
   xt::xtensor<double,6> II() const;
   xt::xtensor<double,6> I4() const;
   xt::xtensor<double,6> I4rt() const;

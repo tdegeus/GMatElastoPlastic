@@ -37,7 +37,7 @@ inline double Elastic::G() const
 template <class T>
 inline void Elastic::stress(const Tensor2& Eps, T&& Sig) const
 {
-  auto I    = Cartesian3d::I();
+  auto I    = Cartesian3d::I2();
   auto epsm = trace(Eps) / 3.0;
   auto Epsd = Eps - epsm * I;
   xt::noalias(Sig) = 3.0 * m_K * epsm * I + 2.0 * m_G * Epsd;
@@ -57,7 +57,7 @@ inline Tensor2 Elastic::Stress(const Tensor2& Eps) const
 template <class T, class S>
 inline void Elastic::tangent(const Tensor2& Eps, T&& Sig, S&& C) const
 {
-  auto I    = Cartesian3d::I();
+  auto I    = Cartesian3d::I2();
   auto II   = Cartesian3d::II();
   auto I4d  = Cartesian3d::I4d();
   auto epsm = trace(Eps) / 3.0;

@@ -89,12 +89,12 @@ inline xt::xtensor<double,2> Matrix::G() const
 
 // -------------------------------------------------------------------------------------------------
 
-inline xt::xtensor<double,4> Matrix::I() const
+inline xt::xtensor<double,4> Matrix::I2() const
 {
   xt::xtensor<double,4> out = xt::empty<double>({m_nelem, m_nip, m_ndim, m_ndim});
   #pragma omp parallel
   {
-    Tensor2 unit = Cartesian3d::I();
+    Tensor2 unit = Cartesian3d::I2();
     #pragma omp for
     for (size_t e = 0; e < m_nelem; ++e) {
       for (size_t q = 0; q < m_nip; ++q) {

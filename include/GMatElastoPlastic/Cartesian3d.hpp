@@ -14,7 +14,7 @@ namespace Cartesian3d {
 
 // -------------------------------------------------------------------------------------------------
 
-inline Tensor2 I()
+inline Tensor2 I2()
 {
   return Tensor2({{1.0, 0.0, 0.0},
                   {0.0, 1.0, 0.0},
@@ -97,14 +97,14 @@ inline double Hydrostatic(const Tensor2& A)
 
 inline Tensor2 Deviatoric(const Tensor2& A)
 {
-  return A - trace(A) / 3.0 * I();
+  return A - trace(A) / 3.0 * I2();
 }
 
 // -------------------------------------------------------------------------------------------------
 
 inline double Epseq(const Tensor2& Eps)
 {
-  Tensor2 Epsd = Eps - trace(Eps) / 3.0 * I();
+  Tensor2 Epsd = Eps - trace(Eps) / 3.0 * I2();
   return std::sqrt(2.0/3.0 * A2_ddot_B2(Epsd,Epsd));
 }
 
@@ -112,7 +112,7 @@ inline double Epseq(const Tensor2& Eps)
 
 inline double Sigeq(const Tensor2& Sig)
 {
-  Tensor2 Sigd = Sig - trace(Sig) / 3.0 * I();
+  Tensor2 Sigd = Sig - trace(Sig) / 3.0 * I2();
   return std::sqrt(1.5 * A2_ddot_B2(Sigd,Sigd));
 }
 
@@ -144,7 +144,7 @@ inline void deviatoric(const xt::xtensor<double,4>& A, xt::xtensor<double,4>& Ad
 
   #pragma omp parallel
   {
-    Tensor2 I = Cartesian3d::I();
+    Tensor2 I = I2();
     #pragma omp for
     for (size_t e = 0; e < A.shape()[0]; ++e) {
       for (size_t q = 0; q < A.shape()[1]; ++q) {
@@ -165,7 +165,7 @@ inline void epseq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq)
 
   #pragma omp parallel
   {
-    Tensor2 I = Cartesian3d::I();
+    Tensor2 I = I2();
     #pragma omp for
     for (size_t e = 0; e < A.shape()[0]; ++e) {
       for (size_t q = 0; q < A.shape()[1]; ++q) {
@@ -186,7 +186,7 @@ inline void sigeq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq)
 
   #pragma omp parallel
   {
-    Tensor2 I = Cartesian3d::I();
+    Tensor2 I = I2();
     #pragma omp for
     for (size_t e = 0; e < A.shape()[0]; ++e) {
       for (size_t q = 0; q < A.shape()[1]; ++q) {
@@ -203,7 +203,7 @@ inline void sigeq(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Aeq)
 inline xt::xtensor<double,2> Hydrostatic(const xt::xtensor<double,4>& A)
 {
   xt::xtensor<double,2> Am = xt::empty<double>({A.shape()[0], A.shape()[1]});
-  Cartesian3d::hydrostatic(A, Am);
+  hydrostatic(A, Am);
   return Am;
 }
 
@@ -212,7 +212,7 @@ inline xt::xtensor<double,2> Hydrostatic(const xt::xtensor<double,4>& A)
 inline xt::xtensor<double,4> Deviatoric(const xt::xtensor<double,4>& A)
 {
   xt::xtensor<double,4> Ad = xt::empty<double>(A.shape());
-  Cartesian3d::deviatoric(A, Ad);
+  deviatoric(A, Ad);
   return Ad;
 }
 
@@ -221,7 +221,7 @@ inline xt::xtensor<double,4> Deviatoric(const xt::xtensor<double,4>& A)
 inline xt::xtensor<double,2> Epseq(const xt::xtensor<double,4>& A)
 {
   xt::xtensor<double,2> Aeq = xt::empty<double>({A.shape()[0], A.shape()[1]});
-  Cartesian3d::epseq(A, Aeq);
+  epseq(A, Aeq);
   return Aeq;
 }
 
@@ -230,7 +230,7 @@ inline xt::xtensor<double,2> Epseq(const xt::xtensor<double,4>& A)
 inline xt::xtensor<double,2> Sigeq(const xt::xtensor<double,4>& A)
 {
   xt::xtensor<double,2> Aeq = xt::empty<double>({A.shape()[0], A.shape()[1]});
-  Cartesian3d::sigeq(A, Aeq);
+  sigeq(A, Aeq);
   return Aeq;
 }
 

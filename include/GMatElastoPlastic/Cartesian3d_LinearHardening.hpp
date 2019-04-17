@@ -59,7 +59,7 @@ inline void LinearHardening::stress(const Tensor2& Eps, T&& Sig)
   xt::noalias(m_Epse) = m_Epse_t + dEps;
 
   // decompose trial elastic strain
-  Tensor2 I     = Cartesian3d::I();
+  Tensor2 I     = Cartesian3d::I2();
   double  epsem = trace(m_Epse) / 3.0;
   Tensor2 Epsed = m_Epse - epsem * I;
 
@@ -106,7 +106,7 @@ template <class T, class S>
 inline void LinearHardening::tangent(const Tensor2& Eps, T&& Sig, S&& C)
 {
   // unit tensors
-  Tensor2 I   = Cartesian3d::I();
+  Tensor2 I   = Cartesian3d::I2();
   Tensor4 II  = Cartesian3d::II();
   Tensor4 I4d = Cartesian3d::I4d();
 
