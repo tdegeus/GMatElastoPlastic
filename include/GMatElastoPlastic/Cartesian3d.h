@@ -43,6 +43,20 @@ inline Tensor2 Deviatoric(const Tensor2& A);
 inline double Sigeq(const Tensor2& Sig);
 inline double Epseq(const Tensor2& Eps);
 
+// List version of the functions above (no allocation)
+
+inline void hydrostatic(const xt::xtensor<double,3>& A  , xt::xtensor<double,1>& Am   );
+inline void deviatoric (const xt::xtensor<double,3>& A  , xt::xtensor<double,3>& Ad   );
+inline void sigeq      (const xt::xtensor<double,3>& Sig, xt::xtensor<double,1>& Sigeq);
+inline void epseq      (const xt::xtensor<double,3>& Eps, xt::xtensor<double,1>& Epseq);
+
+// Auto-allocation allocation of the functions above
+
+inline xt::xtensor<double,1> Hydrostatic(const xt::xtensor<double,3>& A  );
+inline xt::xtensor<double,3> Deviatoric (const xt::xtensor<double,3>& A  );
+inline xt::xtensor<double,1> Sigeq      (const xt::xtensor<double,3>& Sig);
+inline xt::xtensor<double,1> Epseq      (const xt::xtensor<double,3>& Eps);
+
 // Matrix version of the functions above (no allocation)
 
 inline void hydrostatic(const xt::xtensor<double,4>& A  , xt::xtensor<double,2>& Am   );

@@ -33,7 +33,7 @@ namespace SM = GMatElastoPlastic::Cartesian3d;
 
 // -------------------------------------------------------------------------------------------------
 
-sm.def("I", &SM::I);
+sm.def("I2", &SM::I2);
 sm.def("II", &SM::II);
 sm.def("I4", &SM::I4);
 sm.def("I4rt", &SM::I4rt);
@@ -59,6 +59,28 @@ sm.def("Epseq",
 
 sm.def("Sigeq",
   py::overload_cast<const SM::Tensor2&>(&SM::Sigeq),
+  "Equivalent stress deviator",
+  py::arg("Sig"));
+
+// -------------------------------------------------------------------------------------------------
+
+sm.def("Hydrostatic",
+  py::overload_cast<const xt::xtensor<double,3>&>(&SM::Hydrostatic),
+  "Hydrostatic part of a 2nd-order tensor",
+  py::arg("A"));
+
+sm.def("Deviatoric",
+  py::overload_cast<const xt::xtensor<double,3>&>(&SM::Deviatoric),
+  "Deviatoric",
+  py::arg("A"));
+
+sm.def("Epseq",
+  py::overload_cast<const xt::xtensor<double,3>&>(&SM::Epseq),
+  "Equivalent strain deviator",
+  py::arg("Eps"));
+
+sm.def("Sigeq",
+  py::overload_cast<const xt::xtensor<double,3>&>(&SM::Sigeq),
   "Equivalent stress deviator",
   py::arg("Sig"));
 
@@ -158,7 +180,7 @@ py::class_<SM::Matrix>(sm, "Matrix")
   .def("K", &SM::Matrix::K)
   .def("G", &SM::Matrix::G)
 
-  .def("I", &SM::Matrix::I)
+  .def("I2", &SM::Matrix::I2)
   .def("II", &SM::Matrix::II)
   .def("I4", &SM::Matrix::I4)
   .def("I4rt", &SM::Matrix::I4rt)
