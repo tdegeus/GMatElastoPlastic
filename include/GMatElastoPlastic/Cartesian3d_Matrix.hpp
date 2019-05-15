@@ -47,7 +47,7 @@ inline size_t Matrix::nip() const
 inline xt::xtensor<size_t,2> Matrix::type() const
 {
   return m_type;
-};
+}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -336,6 +336,7 @@ inline void Matrix::stress(const xt::xtensor<double,4>& a_Eps, xt::xtensor<doubl
       switch (m_type(e,q)) {
         case Type::Elastic:         m_Elastic        [m_index(e,q)].stress(Eps, Sig); break;
         case Type::LinearHardening: m_LinearHardening[m_index(e,q)].stress(Eps, Sig); break;
+        default: throw std::runtime_error("Invalid type specification");
       }
     }
   }
@@ -364,6 +365,7 @@ inline void Matrix::tangent(
       switch (m_type(e,q)) {
         case Type::Elastic:         m_Elastic        [m_index(e,q)].tangent(Eps, Sig, C); break;
         case Type::LinearHardening: m_LinearHardening[m_index(e,q)].tangent(Eps, Sig, C); break;
+        default: throw std::runtime_error("Invalid type specification");
       }
     }
   }
@@ -383,6 +385,7 @@ inline void Matrix::epsp(xt::xtensor<double,2>& epsp) const
       switch (m_type(e,q)) {
         case Type::Elastic:         epsp(e,q) = m_Elastic        [m_index(e,q)].epsp(); break;
         case Type::LinearHardening: epsp(e,q) = m_LinearHardening[m_index(e,q)].epsp(); break;
+        default: throw std::runtime_error("Invalid type specification");
       }
     }
   }
@@ -398,8 +401,9 @@ inline void Matrix::increment()
   for (size_t e = 0; e < m_nelem; ++e) {
     for (size_t q = 0; q < m_nip; ++q) {
       switch (m_type(e,q)) {
-        case Type::Elastic:         m_Elastic        [m_index(e,q)].increment(); break;
+        case Type::Elastic:                                                      break;
         case Type::LinearHardening: m_LinearHardening[m_index(e,q)].increment(); break;
+        default: throw std::runtime_error("Invalid type specification");
       }
     }
   }
