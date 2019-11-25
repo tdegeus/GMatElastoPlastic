@@ -8,28 +8,36 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 endif()
 
 option(WARNINGS "Show build warnings" ON)
+option(XSIMD "Use xsimd (and 'march=native' optimisations" OFF)
 
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DXTENSOR_USE_XSIMD=ON")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DXTENSOR_USE_XSIMD=ON")
+if(XSIMD)
+    if(NOT MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DXTENSOR_USE_XSIMD=ON")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DXTENSOR_USE_XSIMD=ON")
+    endif()
 endif()
-
-message(STATUS "${CMAKE_CXX_FLAGS}")
 
 find_package(Catch2 REQUIRED)
 find_package(xtensor REQUIRED)
 find_package(xtl REQUIRED)
-find_package(xsimd REQUIRED)
 
 add_executable(main main.cpp Cartesian3d.cpp)
-target_link_libraries(main PUBLIC Catch2::Catch2 xtensor xtl xsimd)
+
+if(XSIMD)
+    find_package(xsimd REQUIRED)
+    target_link_libraries(main PUBLIC Catch2::Catch2 xtensor xtl xsimd)
+else()
+    target_link_libraries(main PUBLIC Catch2::Catch2 xtensor xtl)
+endif()
+
 target_include_directories(main PRIVATE "${GMATELASTOPLASTIC_INCLUDE_DIR}")
+
 if(WARNINGS)
     if(MSVC)
         target_compile_options(main PRIVATE /W4)
