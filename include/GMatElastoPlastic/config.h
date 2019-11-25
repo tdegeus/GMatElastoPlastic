@@ -29,10 +29,6 @@
 #include <xtensor/xtensor_simd.hpp>
 #include <xtensor/xtensor_config.hpp>
 
-#define XSTR(x) STR(x)
-#define STR(x) #x
-#pragma message "XTENSOR_DEFAULT_ALIGNMENT = " XSTR(XTENSOR_DEFAULT_ALIGNMENT)
-
 // -------------------------------------------------------------------------------------------------
 
 #ifndef NDEBUG
