@@ -31,6 +31,7 @@ SECTION("Elastic")
   double gamma = 0.02;
   double epsm = 0.12;
   // - strain
+  Eps.fill(0.0);
   Eps(0,0) = Eps(1,1) = Eps(2,2) = epsm;
   Eps(0,1) = Eps(1,0) = gamma;
   // - stress
@@ -75,6 +76,7 @@ SECTION("Matrix")
   double gamma = 0.02;
   double epsm = 0.12;
   // - strain
+  Eps.fill(0.0);
   Eps(0,0) = Eps(1,1) = Eps(2,2) = epsm;
   Eps(0,1) = Eps(1,0) = gamma;
   // - strain/stress matrices
