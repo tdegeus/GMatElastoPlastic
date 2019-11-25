@@ -1,6 +1,6 @@
 # GMatElastoPlastic
 
-Elasto-plastic material model. An overview of the theory can be found in `docs/theory` in particular in this [PDF](docs/theory/readme.pdf).
+Elasto-plastic material model. An overview of the theory can be found in `docs/` in particular in this [PDF](docs/readme.pdf).
 
 # Contents
 
