@@ -9,9 +9,9 @@
 #include <pybind11/pybind11.h>
 #include <pyxtensor/pyxtensor.hpp>
 
-#define XSTR(x) STR(x)
-#define STR(x) #x
-#pragma message "XTENSOR_DEFAULT_ALIGNMENT = " XSTR(XTENSOR_DEFAULT_ALIGNMENT)
+// #define XSTR(x) STR(x)
+// #define STR(x) #x
+// #pragma message "XTENSOR_DEFAULT_ALIGNMENT = " XSTR(XTENSOR_DEFAULT_ALIGNMENT)
 
 // Enable basic assertions on matrix shape
 // (doesn't cost a lot of time, but avoids segmentation faults)
