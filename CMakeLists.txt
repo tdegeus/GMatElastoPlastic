@@ -38,6 +38,7 @@ set(GMATELASTOPLASTIC_HEADERS
     ${GMATELASTOPLASTIC_INCLUDE_DIR}/GMatElastoPlastic/Cartesian3d.h
     ${GMATELASTOPLASTIC_INCLUDE_DIR}/GMatElastoPlastic/Cartesian3d.hpp
     ${GMATELASTOPLASTIC_INCLUDE_DIR}/GMatElastoPlastic/Cartesian3d_Elastic.hpp
+    ${GMATELASTOPLASTIC_INCLUDE_DIR}/GMatElastoPlastic/Cartesian3d_LinearHardening.hpp
     ${GMATELASTOPLASTIC_INCLUDE_DIR}/GMatElastoPlastic/Cartesian3d_Matrix.hpp
     ${GMATELASTOPLASTIC_INCLUDE_DIR}/GMatElastoPlastic/config.h)
 
