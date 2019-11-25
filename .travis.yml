@@ -79,9 +79,9 @@ install:
     - conda install pyxtensor -c conda-forge
     - conda install catch2 -c conda-forge
     # Build/install the library
-    # - cmake . -DBUILD_TESTS=ON
-    # - make
-    # - sudo make install
+    - cmake . -DBUILD_TESTS=ON
+    - make
+    - sudo make install
     - python setup.py build
     - python setup.py install
 script:
