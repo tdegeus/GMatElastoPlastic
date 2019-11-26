@@ -14,7 +14,7 @@
 #define GMATELASTOPLASTIC_ENABLE_ASSERT
 
 // include library
-#include "../include/GMatElastoPlastic/Cartesian3d.h"
+#include <GMatElastoPlastic/Cartesian3d.h>
 
 // abbreviate name-space
 namespace py = pybind11;
