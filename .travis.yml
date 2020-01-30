@@ -1,5 +1,5 @@
 language: cpp
-dist: trusty
+dist: xenial
 env:
 matrix:
   fast_finish: true
@@ -33,7 +33,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - llvm-toolchain-xenial-6.0
           packages:
             - clang-6.0
       env: COMPILER=clang CLANG=6.0 XSIMD=ON
@@ -72,14 +72,14 @@ install:
     - hash -r
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
-    - conda install cmake -c conda-forge
-    - conda install xtensor -c conda-forge
-    - conda install python -c conda-forge
-    - conda install numpy -c conda-forge
-    - conda install pyxtensor -c conda-forge
-    - conda install catch2 -c conda-forge
+    - conda install -c conda-forge cmake
+    - conda install -c conda-forge xtensor
+    - conda install -c conda-forge python
+    - conda install -c conda-forge numpy
+    - conda install -c conda-forge pyxtensor
+    - conda install -c conda-forge catch2
     - if [[ "$XSIMD" == "ON" ]]; then
-        conda install xsimd -c conda-forge;
+        conda install -c conda-forge xsimd;
       fi
     # Build/install the library
     - cmake . -DBUILD_TESTS=ON -DXSIMD=$XSIMD
