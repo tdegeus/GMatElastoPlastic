@@ -56,7 +56,7 @@ if(NOT TARGET GMatElastoPlastic::assert)
     set_property(
         TARGET GMatElastoPlastic::assert
         PROPERTY INTERFACE_COMPILE_DEFINITIONS
-        GMATELASTIC_ENABLE_ASSERT)
+        GMATELASTOPLASTIC_ENABLE_ASSERT)
 endif()
 
 # Define support target "GMatElastoPlastic::debug"
@@ -66,5 +66,5 @@ if(NOT TARGET GMatElastoPlastic::debug)
     set_property(
         TARGET GMatElastoPlastic::debug
         PROPERTY INTERFACE_COMPILE_DEFINITIONS
-        XTENSOR_ENABLE_ASSERT GMATELASTIC_ENABLE_ASSERT)
+        XTENSOR_ENABLE_ASSERT GMATELASTOPLASTIC_ENABLE_ASSERT)
 endif()
