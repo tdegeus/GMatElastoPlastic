@@ -370,8 +370,8 @@ inline void Matrix::stress(const xt::xtensor<double,4>& a_Eps, xt::xtensor<doubl
 
 inline void Matrix::tangent(
     const xt::xtensor<double,4>& a_Eps,
-    xt::xtensor<double,4>& a_Sig,
-    xt::xtensor<double,6>& a_C)
+          xt::xtensor<double,4>& a_Sig,
+          xt::xtensor<double,6>& a_C)
 {
     GMATELASTOPLASTIC_ASSERT(m_allSet);
     GMATELASTOPLASTIC_ASSERT(
