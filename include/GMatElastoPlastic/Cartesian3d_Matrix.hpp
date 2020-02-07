@@ -229,7 +229,7 @@ inline xt::xtensor<double,6> Matrix::I4d() const
 
 inline xt::xtensor<size_t,2> Matrix::isPlastic() const
 {
-    GMATELASTOPLASTICQPOT_ASSERT(m_allSet);
+    GMATELASTOPLASTIC_ASSERT(m_allSet);
 
     xt::xtensor<size_t,2> out = xt::where(xt::not_equal(m_type, Type::Elastic), 1ul, 0ul);
     return out;
