@@ -23,31 +23,30 @@ Eps.fill(0.0);
 Eps(0,0) = Eps(1,1) = Eps(2,2) = epsm;
 Eps(0,1) = Eps(1,0) = gamma;
 
-SECTION("Elastic: simple shear + volumetric deformation")
+SECTION("Elastic")
 {
   GM::Elastic mat(K, G);
 
     Sig = mat.Stress(Eps);
 
-  EQ(Sig(0,0), 3.0 * K * epsm);
-  EQ(Sig(1,1), 3.0 * K * epsm);
-  EQ(Sig(2,2), 3.0 * K * epsm);
-  EQ(Sig(0,1), 2.0 * G * gamma);
-  EQ(Sig(1,0), 2.0 * G * gamma);
+    EQ(Sig(0,0), 3.0 * K * epsm);
+    EQ(Sig(1,1), 3.0 * K * epsm);
+    EQ(Sig(2,2), 3.0 * K * epsm);
+    EQ(Sig(0,1), 2.0 * G * gamma);
+    EQ(Sig(1,0), 2.0 * G * gamma);
     EQ(Sig(0,2), 0.0);
     EQ(Sig(1,2), 0.0);
     EQ(Sig(2,0), 0.0);
     EQ(Sig(2,1), 0.0);
 }
 
-SECTION("Matrix: simple shear + volumetric deformation")
+SECTION("Matrix")
 {
   size_t nelem = 3;
   size_t nip = 2;
 
     GM::Matrix mat(nelem, nip);
 
-    // all rows elastic
     {
         xt::xtensor<size_t,2> I = xt::ones<size_t>({nelem, nip});
         mat.setElastic(I, K, G);
@@ -57,7 +56,7 @@ SECTION("Matrix: simple shear + volumetric deformation")
 
     for (size_t e = 0; e < nelem; ++e) {
         for (size_t q = 0; q < nip; ++q) {
-      xt::view(eps, e, q) = Eps;
+            xt::view(eps, e, q) = Eps;
         }
     }
 
