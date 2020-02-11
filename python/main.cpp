@@ -216,9 +216,17 @@ py::class_<SM::Matrix>(sm, "Matrix")
 
     .def("type", &SM::Matrix::type, "Return matrix with material types.")
 
+    .def("isElastic",
+        &SM::Matrix::isElastic,
+        "Return matrix with boolean: Elastic (1) or not (0).")
+
     .def("isPlastic",
         &SM::Matrix::isPlastic,
-        "Return matrix with boolean: elastic (0) or plastic (1).")
+        "Return matrix with boolean: Elastic (0) or plastic (LinearHardening) (1).")
+
+    .def("isLinearHardening",
+        &SM::Matrix::isLinearHardening,
+        "Return matrix with boolean: LinearHardening (1) or not (0).")
 
     .def("check",
         &SM::Matrix::check,

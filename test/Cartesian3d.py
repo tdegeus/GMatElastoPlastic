@@ -22,7 +22,6 @@ Eps = np.array(
 # Elastic
 
 mat = GMat.Elastic(K, G)
-
 Sig = mat.Stress(Eps)
 
 EQ(Sig[0,0], 3.0 * K * epsm)
@@ -41,7 +40,6 @@ nelem = 2
 nip = 2
 mat = GMat.Matrix(nelem, nip)
 
-# all rows: elastic
 I = np.ones([nelem, nip], dtype='int')
 mat.setElastic(I, K, G)
 

@@ -189,7 +189,9 @@ public:
     // Type
 
     xt::xtensor<size_t,2> type() const;
+    xt::xtensor<size_t,2> isElastic() const;
     xt::xtensor<size_t,2> isPlastic() const;
+    xt::xtensor<size_t,2> isLinearHardening() const;
 
     // Parameters
 
@@ -285,8 +287,8 @@ private:
     static const size_t m_ndim = 3;
 
     // Internal check
-    bool m_allSet = false;
-    void checkAllSet();
+    bool m_allSet = false; // true if all points have a material assigned
+    void checkAllSet(); // check if all points have a material assigned (modifies "m_allSet")
 };
 
 // Internal support functions

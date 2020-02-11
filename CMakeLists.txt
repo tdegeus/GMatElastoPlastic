@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.0)
 
 # Basic settings
@@ -10,21 +11,21 @@ option(BUILD_TESTS "${PROJECT_NAME} Build tests" OFF)
 # Version
 # =======
 
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/GMatElastoPlastic/config.h" GMatElastoPlastic_version_defines
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/GMatElastoPlastic/config.h"
+             _GMAT_version_defines
      REGEX "#define GMATELASTOPLASTIC_VERSION_(MAJOR|MINOR|PATCH)")
 
-foreach(ver ${GMatElastoPlastic_version_defines})
+foreach(ver ${_GMAT_version_defines})
     if(ver MATCHES "#define GMATELASTOPLASTIC_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
-    set(GMATELASTOPLASTIC_VERSION_${CMAKE_MATCH_1}
-        "${CMAKE_MATCH_2}"
-        CACHE INTERNAL "")
+        set(_GMAT_VERSION_${CMAKE_MATCH_1}
+            "${CMAKE_MATCH_2}"
+            CACHE INTERNAL "")
     endif()
 endforeach()
 
-set(GMATELASTOPLASTIC_VERSION
-    ${GMATELASTOPLASTIC_VERSION_MAJOR}.${GMATELASTOPLASTIC_VERSION_MINOR}.${GMATELASTOPLASTIC_VERSION_PATCH})
+set(_GMAT_VERSION ${_GMAT_VERSION_MAJOR}.${_GMAT_VERSION_MINOR}.${_GMAT_VERSION_PATCH})
 
-message(STATUS "Building GMatElastoPlastic v${GMATELASTOPLASTIC_VERSION}")
+message(STATUS "Building GMatElastoPlastic v${_GMAT_VERSION}")
 
 # Set target
 # ==========
@@ -50,18 +51,19 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION include)
 install(TARGETS GMatElastoPlastic EXPORT GMatElastoPlastic-targets)
 
 install(
-  EXPORT GMatElastoPlastic-targets
-  FILE GMatElastoPlasticTargets.cmake
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/GMatElastoPlastic")
+    EXPORT GMatElastoPlastic-targets
+    FILE GMatElastoPlasticTargets.cmake
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/GMatElastoPlastic")
 
-set(_GMATELASTOPLASTIC ${CMAKE_SIZEOF_VOID_P})
+set(_GMAT ${CMAKE_SIZEOF_VOID_P})
 unset(CMAKE_SIZEOF_VOID_P)
 
-write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/GMatElastoPlasticConfigVersion.cmake"
-    VERSION ${GMATELASTOPLASTIC_VERSION}
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/GMatElastoPlasticConfigVersion.cmake"
+    VERSION ${_GMAT_VERSION}
     COMPATIBILITY AnyNewerVersion)
 
-set(CMAKE_SIZEOF_VOID_P ${_GMATELASTOPLASTIC})
+set(CMAKE_SIZEOF_VOID_P ${_GMAT})
 
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/GMatElastoPlasticConfig.cmake"
               "${CMAKE_CURRENT_BINARY_DIR}/GMatElastoPlasticConfigVersion.cmake"

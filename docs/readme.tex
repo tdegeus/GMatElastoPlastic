@@ -1,10 +1,10 @@
-\documentclass[times]{goose-article}
-
-\hypersetup{pdfauthor={T.W.J. de Geus}}
+\documentclass[namecite, fleqn]{goose-article}
 
 \title{Isotropic elasto-plasticity}
 
 \author{Tom W.J.\ de Geus}
+
+\hypersetup{pdfauthor={T.W.J. de Geus}}
 
 \newcommand\leftstar[1]{\hspace*{-.3em}~^\star\!#1}
 
@@ -14,122 +14,150 @@
 
 \begin{abstract}
 \noindent
-History dependent elasto-plastic material. This corresponds to a non-linear relation between the Cauchy stress, $\bm{\sigma}$, and the linear strain increment, $\bm{\varepsilon}_\Delta$, depending on the equivalent plastic strain, $\varepsilon_\mathrm{p}$. I.e.
+History dependent elasto-plastic material.
+This corresponds to a non-linear relation between the Cauchy stress, $\bm{\sigma}$,
+and the linear strain increment, $\bm{\varepsilon}_\Delta$,
+depending on the equivalent plastic strain, $\varepsilon_\mathrm{p}$.
+I.e.
 \begin{equation*}
-  \bm{\sigma} =
-  f ( \bm{\varepsilon}_\Delta , \varepsilon_\mathrm{p} )
+    \bm{\sigma}
+    = f ( \bm{\varepsilon}_\Delta , \varepsilon_\mathrm{p} )
 \end{equation*}
 The plasticity follows power-law hardening
 \begin{equation*}
-  \sigma_\mathrm{y} (\varepsilon_\mathrm{p})
-  = \sigma_\mathrm{y0} + \varepsilon_\mathrm{p}^n
+    \sigma_\mathrm{y} (\varepsilon_\mathrm{p})
+    = \sigma_\mathrm{y0} + \varepsilon_\mathrm{p}^n
 \end{equation*}
-The model is implemented in 3-D, hence it can directly be used for either 3-D or 2-D plane strain problems.
+The model is implemented in 3-D, hence it can directly be used for either 3-D
+or 2-D plane strain problems.
 \end{abstract}
 
 \section{Constitutive model}
 
 The model consists of the following ingredients:
 \begin{enumerate}[(i)]
-\item The strain, $\bm{\varepsilon}$, is additively split in an elastic part, $\bm{\varepsilon}_\mathrm{e}$, and a plastic plastic, $\bm{\varepsilon}_\mathrm{p}$. I.e.
-\begin{equation}
-  \bm{\varepsilon} \equiv \bm{\varepsilon}_\mathrm{e} + \bm{\varepsilon}_\mathrm{p}
-\end{equation}
-\item The stress, $\bm{\sigma}$, is set by to the elastic strain, $\bm{\varepsilon}_\mathrm{e}$, through the following linear relation:
-\begin{equation}
-  \bm{\sigma} \equiv \mathbb{C}_\mathrm{e} : \bm{\varepsilon}_\mathrm{e}
-\end{equation}
-wherein $\mathbb{C}_\mathrm{e}$ is the elastic stiffness, which reads:
-\begin{align}
-  \mathbb{C}_\mathrm{e}
-  &\equiv K \bm{I} \otimes \bm{I}
-   + 2 G (\mathbb{I}_\mathrm{s} - \tfrac{1}{3} \bm{I} \otimes \bm{I} )
-  \\
-  &= K \bm{I} \otimes \bm{I}
-  + 2 G \, \mathbb{I}_\mathrm{d}
-\end{align}
-with $K$ and $G$ the bulk and shear modulus respectively. See Appendix~\ref{sec:ap:nomenclature} for nomenclature, including definitions of the unit tensors.
-\item The elastic domain is bounded by the following yield function
-\begin{equation}
-  \Phi( \bm{\sigma} , \varepsilon_\mathrm{p} ) \equiv \sigma_\mathrm{eq} - \sigma_\mathrm{y} (\varepsilon_\mathrm{p}) \leq 0
-\end{equation}
-where $\sigma_\mathrm{eq}$ the equivalent stress (see Appendix~\ref{sec:ap:stress}), and $\sigma_\mathrm{y}$ the yield stress which is a non-linear function of the equivalent plastic strain, $\varepsilon_\mathrm{p}$.
-\item To determine the direction of plastic flow, normality is assumed. This corresponds to the following associative flow rule:
-\begin{equation}
-  \dot{\bm{\varepsilon}}_\mathrm{p} \equiv \dot{\gamma} \bm{N}
-\end{equation}
-where $\dot{\gamma}$ is the plastic multiplier, and $\bm{N}$ is the Prandtl--Reuss flow vector, which is defined through normality:
-\begin{equation}
-  \bm{N} \equiv \frac{\partial \Phi}{\partial \bm{\sigma}}
-  = \sqrt{\frac{3}{2}} \;
-    \frac{\bm{\sigma}_\mathrm{d}}{|| \bm{\sigma}_\mathrm{d} ||}
-  = \frac{3}{2}
-    \frac{\bm{\sigma}_\mathrm{d}}{\sigma_\mathrm{eq}}
-\end{equation}
-\item Finally, associative hardening is assumed:
-\begin{equation}
-  \dot{\varepsilon}_\mathrm{p}
-  \equiv \sqrt{\tfrac{2}{3}} \; \big|\big| \dot{\bm{\varepsilon}}_\mathrm{p} \big|\big|
-  = \dot{\gamma}
-\end{equation}
-The equivalent plastic strain then reads
-\begin{equation}
-  \varepsilon_\mathrm{p} =
-  \int\limits_0^t \dot{\varepsilon}_\mathrm{p} ~\mathrm{d}\tau
-\end{equation}
+
+    \item The strain, $\bm{\varepsilon}$, is additively split in an elastic part,
+    $\bm{\varepsilon}_\mathrm{e}$, and a plastic plastic, $\bm{\varepsilon}_\mathrm{p}$.
+    I.e.
+    \begin{equation}
+        \bm{\varepsilon} \equiv \bm{\varepsilon}_\mathrm{e} + \bm{\varepsilon}_\mathrm{p}
+    \end{equation}
+
+    \item The stress, $\bm{\sigma}$, is set by to the elastic strain,
+    $\bm{\varepsilon}_\mathrm{e}$, through the following linear relation:
+    \begin{equation}
+        \bm{\sigma} \equiv \mathbb{C}_\mathrm{e} : \bm{\varepsilon}_\mathrm{e}
+    \end{equation}
+    wherein $\mathbb{C}_\mathrm{e}$ is the elastic stiffness, which reads:
+    \begin{align}
+        \mathbb{C}_\mathrm{e}
+        &\equiv K \bm{I} \otimes \bm{I}
+        + 2 G (\mathbb{I}_\mathrm{s} - \tfrac{1}{3} \bm{I} \otimes \bm{I} )
+        \\
+        &= K \bm{I} \otimes \bm{I}
+        + 2 G \, \mathbb{I}_\mathrm{d}
+    \end{align}
+    with $K$ and $G$ the bulk and shear modulus respectively.
+    See \cref{sec:ap:nomenclature} for nomenclature,
+    including definitions of the unit tensors.
+
+    \item The elastic domain is bounded by the following yield function
+    \begin{equation}
+        \Phi( \bm{\sigma} , \varepsilon_\mathrm{p} )
+        \equiv \sigma_\mathrm{eq} - \sigma_\mathrm{y} (\varepsilon_\mathrm{p}) \leq 0
+    \end{equation}
+    where $\sigma_\mathrm{eq}$ the equivalent stress (see \cref{sec:ap:stress}),
+    and $\sigma_\mathrm{y}$ the yield stress which is a non-linear function of
+    the equivalent plastic strain, $\varepsilon_\mathrm{p}$.
+
+    \item To determine the direction of plastic flow, normality is assumed.
+    This corresponds to the following associative flow rule:
+    \begin{equation}
+        \dot{\bm{\varepsilon}}_\mathrm{p} \equiv \dot{\gamma} \bm{N}
+    \end{equation}
+    where $\dot{\gamma}$ is the plastic multiplier, and $\bm{N}$ is the Prandtl--Reuss flow vector,
+    which is defined through normality:
+    \begin{equation}
+        \bm{N} \equiv \frac{\partial \Phi}{\partial \bm{\sigma}}
+        = \sqrt{\frac{3}{2}} \;
+        \frac{\bm{\sigma}_\mathrm{d}}{|| \bm{\sigma}_\mathrm{d} ||}
+        = \frac{3}{2}
+        \frac{\bm{\sigma}_\mathrm{d}}{\sigma_\mathrm{eq}}
+    \end{equation}
+
+    \item Finally, associative hardening is assumed:
+    \begin{equation}
+        \dot{\varepsilon}_\mathrm{p}
+        \equiv \sqrt{\tfrac{2}{3}} \; \big|\big| \dot{\bm{\varepsilon}}_\mathrm{p} \big|\big|
+        = \dot{\gamma}
+    \end{equation}
+    The equivalent plastic strain then reads
+    \begin{equation}
+        \varepsilon_\mathrm{p}
+        = \int\limits_0^t \dot{\varepsilon}_\mathrm{p} ~\mathrm{d}\tau
+    \end{equation}
+
 \end{enumerate}
 For a more detailed description the reader is referred to \citet[][p.\ 216-234]{DeSouzaNeto2008}.
 
 \section{Numerical implementation: implicit}
 
-For the numerical implementation, first of all a numerical time integration scheme has to be selected. Here, an implicit time discretisation is used, which has the favourable property of being unconditionally stable. The numerical implementation of it is done by the commonly used return-map algorithm, in which an increment in strain is first assumed fully elastic (elastic predictor). Then, if needed, a return-map is utilized to return to a physically admissible state (plastic corrector).
+For the numerical implementation, first of all
+a numerical time integration scheme has to be selected.
+Here, an implicit time discretisation is used, which has the
+favourable property of being unconditionally stable.
+The numerical implementation of it is done by the commonly used return-map algorithm,
+in which an increment in strain is first assumed fully elastic (elastic predictor).
+Then, if needed, a return-map is utilized to return to a physically admissible state
+(plastic corrector).
 
 \subsection{Elastic predictor}
 
 Given an increment in strain
 \begin{equation}
-  \bm{\varepsilon}_\Delta
-  = \bm{\varepsilon} - \bm{\varepsilon}^{(t)}
+    \bm{\varepsilon}_\Delta
+    = \bm{\varepsilon} - \bm{\varepsilon}^{(t)}
 \end{equation}
 and the state variables, evaluate the \emph{elastic trial state}:
 \begin{align}
-  \leftstar{\bm{\varepsilon}}_\mathrm{e}
-  &= \bm{\varepsilon}_\mathrm{e}^{(t)} + \bm{\varepsilon}_\Delta
-  \\
-  \leftstar{\varepsilon}_\mathrm{p}
-  &= \varepsilon_\mathrm{p}^{(t)}
+    \leftstar{\bm{\varepsilon}}_\mathrm{e}
+    &= \bm{\varepsilon}_\mathrm{e}^{(t)} + \bm{\varepsilon}_\Delta
+    \\
+    \leftstar{\varepsilon}_\mathrm{p}
+    &= \varepsilon_\mathrm{p}^{(t)}
 \end{align}
 The corresponding trial stress is computed by
 \begin{equation}
-  \leftstar{\bm{\sigma}}
-  = \mathbb{C}_\mathrm{e} : \leftstar{\bm{\varepsilon}}_\mathrm{e}
+    \leftstar{\bm{\sigma}}
+    = \mathbb{C}_\mathrm{e} : \leftstar{\bm{\varepsilon}}_\mathrm{e}
 \end{equation}
 Finally the trial value of the yield function follows as
 \begin{equation}
-  \leftstar{\Phi}
-  = \Phi( \leftstar{\bm{\sigma}} , \leftstar{\varepsilon}_\mathrm{p} )
-  = \leftstar{\sigma}_\mathrm{eq}
-  - \sigma_\mathrm{y} (\leftstar{\varepsilon}_\mathrm{p})
+    \leftstar{\Phi}
+    = \Phi( \leftstar{\bm{\sigma}} , \leftstar{\varepsilon}_\mathrm{p} )
+    = \leftstar{\sigma}_\mathrm{eq}
+    - \sigma_\mathrm{y} (\leftstar{\varepsilon}_\mathrm{p})
 \end{equation}
 
 \subsection{Trial state: elastic}
 
 If the trial state is within the (current) yield surface, i.e.\ when
 \begin{equation}
-  \leftstar{\Phi} \leq 0
+    \leftstar{\Phi} \leq 0
 \end{equation}
 the trial state coincides with the actual state, and:
 \begin{align}
-  \bm{\varepsilon}_\mathrm{e}
-  &= \leftstar{\bm{\varepsilon}}_\mathrm{e}
-   = \bm{\varepsilon}_\mathrm{e}^{(t)} + \bm{\varepsilon}_\Delta
-  \\
-  \varepsilon_\mathrm{p}
-  &= \leftstar{\varepsilon}_\mathrm{p}
-   = \varepsilon_\mathrm{p}^{(t)}
-  \\
-  \bm{\sigma}
-  &= \leftstar{\bm{\sigma}}
+    \bm{\varepsilon}_\mathrm{e}
+    &= \leftstar{\bm{\varepsilon}}_\mathrm{e}
+    = \bm{\varepsilon}_\mathrm{e}^{(t)} + \bm{\varepsilon}_\Delta
+    \\
+    \varepsilon_\mathrm{p}
+    &= \leftstar{\varepsilon}_\mathrm{p}
+    = \varepsilon_\mathrm{p}^{(t)}
+    \\
+    \bm{\sigma}
+    &= \leftstar{\bm{\sigma}}
 \end{align}
 
 Otherwise a return-map is needed (see below).
@@ -138,70 +166,73 @@ Otherwise a return-map is needed (see below).
 
 If the trial state is outside the (current) yield surface, i.e.\ when
 \begin{equation}
-  \leftstar{\Phi} > 0
+    \leftstar{\Phi} > 0
 \end{equation}
-plastic flow occurs in the increment. A return-map is needed to return to the admissible state. The admissible state has to satisfy the following system of equations:
+plastic flow occurs in the increment.
+A return-map is needed to return to the admissible state.
+The admissible state has to satisfy the following system of equations:
 \begin{equation}
-\begin{cases}
-  \; \bm{\varepsilon}_\mathrm{e}
-    &= \leftstar\bm{\varepsilon}_\mathrm{e}
-     - \Delta \gamma \; \bm{N}
-  \\[2mm]
-  \; \varepsilon_\mathrm{p}
-    &= \varepsilon_\mathrm{p}^{(t)} + \Delta \gamma
-  \\[2mm]
-  \; \Phi
-    &= \sigma_\mathrm{eq}
-     - \sigma_\mathrm{y} \big( \varepsilon_\mathrm{p}^{(t)} + \Delta\gamma \big)
-     = 0
-\end{cases}
+    \begin{cases}
+        \; \bm{\varepsilon}_\mathrm{e}
+        &= \leftstar\bm{\varepsilon}_\mathrm{e}
+        - \Delta \gamma \; \bm{N}
+        \\[2mm]
+        \; \varepsilon_\mathrm{p}
+        &= \varepsilon_\mathrm{p}^{(t)} + \Delta \gamma
+        \\[2mm]
+        \; \Phi
+        &= \sigma_\mathrm{eq}
+        - \sigma_\mathrm{y} \big( \varepsilon_\mathrm{p}^{(t)} + \Delta\gamma \big)
+        = 0
+    \end{cases}
 \end{equation}
 
 \subsubsection{Scalar equation return-map}
 
 This can be reduced by using that
 \begin{align}
-  \bm{\sigma}_\mathrm{d}
-  &= \leftstar{\bm{\sigma}}_\mathrm{d}
-   - 2 G \Delta \gamma \; \bm{N}
-  \\
-  &= \leftstar{\bm{\sigma}}_\mathrm{d}
-   - 3 G \Delta \gamma \;
-   \frac{
-     \bm{\sigma}_\mathrm{d}
-   }{
-     \sigma_\mathrm{eq}
-   }
+    \bm{\sigma}_\mathrm{d}
+    &= \leftstar{\bm{\sigma}}_\mathrm{d}
+     - 2 G \Delta \gamma \; \bm{N}
+    \\
+    &= \leftstar{\bm{\sigma}}_\mathrm{d}
+    - 3 G \Delta \gamma \;
+    \frac{
+        \bm{\sigma}_\mathrm{d}
+    }{
+        \sigma_\mathrm{eq}
+    }
 \end{align}
 From this is follows that:
 \begin{equation}
-  \frac{\bm{\sigma}_\mathrm{d}}{\sigma_\mathrm{eq}}
-  = \frac{\leftstar{\bm{\sigma}}_\mathrm{d}}{\leftstar{\sigma}_\mathrm{eq}}
-  \qquad
-  \text{or}
-  \qquad
-  \bm{N}
-  = \leftstar{\bm{N}}
+    \frac{\bm{\sigma}_\mathrm{d}}{\sigma_\mathrm{eq}}
+    = \frac{\leftstar{\bm{\sigma}}_\mathrm{d}}{\leftstar{\sigma}_\mathrm{eq}}
+    \qquad
+    \text{or}
+    \qquad
+    \bm{N}
+    = \leftstar{\bm{N}}
 \end{equation}
 And thus
 \begin{equation}
-  \bm{\sigma}_\mathrm{d}
-  = \left( 1 - \frac{3 G \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \right)
+    \bm{\sigma}_\mathrm{d}
+    = \left( 1 - \frac{3 G \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \right)
     \leftstar{\bm{\sigma}}_\mathrm{d}
 \end{equation}
 whereby the equivalent stress trivially follows as
 \begin{equation}
-  \sigma_\mathrm{eq} =
-  \leftstar{\sigma}_\mathrm{eq} - 3 G \Delta \gamma
+    \sigma_\mathrm{eq} =
+    \leftstar{\sigma}_\mathrm{eq} - 3 G \Delta \gamma
 \end{equation}
-In stead of the system return the plastic multiplier $\Delta \gamma$ can directly be found by enforcing the yield surface
+In stead of the system return the plastic multiplier $\Delta \gamma$ can directly
+be found by enforcing the yield surface
 \begin{equation}
 \label{eq:return-scalar}
-  \Phi
-  = \leftstar{\sigma}_\mathrm{eq}
-  - 3 G \Delta \gamma
-  - \sigma_\mathrm{y} \big( \varepsilon_\mathrm{p}^{(t)} + \Delta \gamma \big)
-  = 0
+    \Phi
+    = \leftstar{\sigma}_\mathrm{eq}
+    - 3 G \Delta \gamma
+    - \sigma_\mathrm{y} \big( \varepsilon_\mathrm{p}^{(t)} + \Delta \gamma \big)
+    = 0
 \end{equation}
 This (non-linear) equation has to be solved for the unknown plastic multiplier $\Delta \gamma$.
 
@@ -209,241 +240,262 @@ This (non-linear) equation has to be solved for the unknown plastic multiplier $
 
 Linear hardening reads
 \begin{equation}
-  \sigma_\mathrm{y} = \sigma_\mathrm{y0} + H \varepsilon_\mathrm{p}
+    \sigma_\mathrm{y} = \sigma_\mathrm{y0} + H \varepsilon_\mathrm{p}
 \end{equation}
-In this case \eqref{eq:return-scalar} can be solved analytically. The solution reads
+In this case \cref{eq:return-scalar} can be solved analytically.
+The solution reads
 \begin{equation}
-  \Delta \gamma
-  = \frac{ \leftstar{\Phi} }{ 3G + H }
+    \Delta \gamma
+    = \frac{ \leftstar{\Phi} }{ 3G + H }
 \end{equation}
 
 \subsubsection{Non-linear hardening}
 
 \begin{enumerate}[(1)]
-\item Initial guess:
-\begin{equation}
-  \Delta \gamma
-    := 0
-\end{equation}
-and evaluate
-\begin{equation}
-  \tilde{\Phi}
-    := \leftstar{\Phi}
-\end{equation}
-\item Perform Newton-Raphson iteration:
-\begin{itemize}
-\item Hardening slope
-\begin{equation}
-  H
-  := \left.
-     \frac{
-       \mathrm{d} \sigma_\mathrm{y}
-     }{
-       \mathrm{d} \varepsilon_\mathrm{p}
-     }
-     \right|_{\varepsilon_\mathrm{p}^{(t)} + \Delta \gamma}
-\end{equation}
-\item Residual derivative:
-\begin{equation}
-  d := \frac{\mathrm{d} \tilde{\Phi}}{\mathrm{d} \Delta \gamma}
-     = -3G - H
-\end{equation}
-\item Update guess for the plastic multiplier:
-\begin{equation}
-  \Delta \gamma := \Delta \gamma - \frac{\tilde{\Phi}}{d}
-\end{equation}
-\end{itemize}
-\item Check for convergence:
-\begin{equation}
-\tilde{\Phi}
-  := \leftstar{\sigma}_\mathrm{eq}
-   - 3 G \Delta \gamma
-   - \sigma_\mathrm{y} ( \varepsilon_\mathrm{p}^{(t)} + \Delta \gamma )
-\end{equation}
-Stop if:
-\begin{equation}
-  \big| \tilde{\Phi} \big| \leq \epsilon_\mathrm{tol}
-\end{equation}
-Otherwise continue with (2)
+
+    \item Initial guess:
+    \begin{equation}
+        \Delta \gamma
+        := 0
+    \end{equation}
+    and evaluate
+    \begin{equation}
+        \tilde{\Phi}
+        := \leftstar{\Phi}
+    \end{equation}
+
+    \item Perform Newton-Raphson iteration:
+    \begin{itemize}
+
+    \item Hardening slope
+    \begin{equation}
+        H
+        := \left.
+        \frac{
+            \mathrm{d} \sigma_\mathrm{y}
+        }{
+            \mathrm{d} \varepsilon_\mathrm{p}
+        }
+        \right|_{\varepsilon_\mathrm{p}^{(t)} + \Delta \gamma}
+    \end{equation}
+
+    \item Residual derivative:
+    \begin{equation}
+        d := \frac{\mathrm{d} \tilde{\Phi}}{\mathrm{d} \Delta \gamma}
+        = -3G - H
+    \end{equation}
+
+    \item Update guess for the plastic multiplier:
+    \begin{equation}
+        \Delta \gamma := \Delta \gamma - \frac{\tilde{\Phi}}{d}
+    \end{equation}
+    \end{itemize}
+
+    \item Check for convergence:
+    \begin{equation}
+        \tilde{\Phi}
+        := \leftstar{\sigma}_\mathrm{eq}
+        - 3 G \Delta \gamma
+        - \sigma_\mathrm{y} ( \varepsilon_\mathrm{p}^{(t)} + \Delta \gamma )
+    \end{equation}
+    Stop if:
+    \begin{equation}
+        \big| \tilde{\Phi} \big| \leq \epsilon_\mathrm{tol}
+    \end{equation}
+    Otherwise continue with (2)
+
 \end{enumerate}
 
 \subsubsection{Trial state update}
 
 Finally, the trial state is updated:
 \begin{itemize}
-\item The updated stress tensor
-\begin{equation}
-  \bm{\sigma}
-    = \sigma_\mathrm{m} \bm{I}
-    + \bm{\sigma}_\mathrm{d}
-\end{equation}
-with
-\begin{align}
-  \sigma_\mathrm{m}
-    &= \leftstar{\sigma}_\mathrm{m}
-  \\
-  \bm{\sigma}_\mathrm{d}
-    &= \left(
-         1 - \frac{3 G \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}}
-       \right) \leftstar{\bm{\sigma}}_\mathrm{d}
-\end{align}
-\item The updated elastic strain tensor
-\begin{equation}
-  \bm{\varepsilon}_\mathrm{e}
-    = \frac{1}{2G} \bm{\sigma}_\mathrm{d}
-    + \tfrac{1}{3} \;\mathrm{tr} (\leftstar{\bm{\varepsilon}}) \bm{I}
-\end{equation}
-\item The updated equivalent plastic strain:
-\begin{equation}
-  \varepsilon_\mathrm{p}
-    = \varepsilon_\mathrm{p}^{(t)}
-    + \Delta \gamma
-\end{equation}
+
+    \item The updated stress tensor
+    \begin{equation}
+        \bm{\sigma}
+        = \sigma_\mathrm{m} \bm{I}
+        + \bm{\sigma}_\mathrm{d}
+    \end{equation}
+    with
+    \begin{align}
+        \sigma_\mathrm{m}
+        &= \leftstar{\sigma}_\mathrm{m}
+        \\
+        \bm{\sigma}_\mathrm{d}
+        &= \left(
+            1 - \frac{3 G \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}}
+        \right) \leftstar{\bm{\sigma}}_\mathrm{d}
+    \end{align}
+
+    \item The updated elastic strain tensor
+    \begin{equation}
+        \bm{\varepsilon}_\mathrm{e}
+        = \frac{1}{2G} \bm{\sigma}_\mathrm{d}
+        + \tfrac{1}{3} \;\mathrm{tr} (\leftstar{\bm{\varepsilon}}) \bm{I}
+    \end{equation}
+
+    \item The updated equivalent plastic strain:
+    \begin{equation}
+        \varepsilon_\mathrm{p}
+        = \varepsilon_\mathrm{p}^{(t)}
+        + \Delta \gamma
+    \end{equation}
+
 \end{itemize}
 
 \section{Consistent tangent}
 
-To derive the consistent tangent, the first step is to combine the above to an explicit relation between the (actual) stress $\bm{\sigma}$ and the trial elastic strain $\leftstar{\bm{\varepsilon}}_\mathrm{e}$.
+To derive the consistent tangent, the first step is to combine the above to an explicit
+relation between the (actual) stress $\bm{\sigma}$ and the trial elastic strain
+$\leftstar{\bm{\varepsilon}}_\mathrm{e}$.
 \begin{itemize}
-\item If elastic:
-\begin{equation}
-  \bm{\sigma}
-    = \leftstar{\bm{\sigma}}
-    = \mathbb{C}_\mathrm{e} : \leftstar{\bm{\varepsilon}}_\mathrm{e}
-\end{equation}
-The tangent then trivially follows:
-\begin{equation}
-  \mathbb{C}_\mathrm{ep}
-  =
-  \frac{
-    \partial  \bm{\sigma} \hfill
-  }{
-    \partial \bm{\varepsilon} \hfill
-  }
-  =
-  \frac{
-    \partial ~\bm{\sigma} \hfill
-  }{
-    \partial \;\leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
-  }
-  =
-  \mathbb{C}_\mathrm{e}
-\end{equation}
-\item If plastic:
-\begin{align}
-  \bm{\sigma}
-    &= \sigma_\mathrm{m} \bm{I}
-     + \bm{\sigma}_\mathrm{d}
-    \\
-    &= \leftstar{\sigma}_\mathrm{m} \bm{I}
-    + \left( 1- \frac{3 G \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \right)
-      \leftstar{\bm{\sigma}}_\mathrm{d}
-    \\
-    &= \leftstar{\sigma}_\mathrm{m} \bm{I}
-     + \left( 1-\frac{3 G \Delta\gamma}{\leftstar{\sigma}_\mathrm{eq}} \right)
-       2 G \; \leftstar{\bm{\varepsilon}}_\mathrm{e}^\mathrm{d}
-    \\
-    &=
-    \left[
-      \mathbb{C}_\mathrm{e} -
-      \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \, \mathbb{I}_\mathrm{d}
-    \right] : \leftstar{\bm{\varepsilon}}_\mathrm{e}
-\end{align}
-The tangent then follows from
-\begin{align}
-  \mathbb{C}_\mathrm{ep} &=
-  \frac{
-    \partial  \bm{\sigma} \hfill
-  }{
-    \partial \bm{\varepsilon} \hfill
-  } =
-  \frac{
-    \partial ~\bm{\sigma} \hfill
-  }{
-    \partial \;\leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
-  }
-  \\
-  &=
-  \mathbb{C}_\mathrm{e} -
-  \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}}
-  \mathbb{I}_\mathrm{d}
-  + 4 G^2
-  \left[
-    \frac{\Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} -
-    \frac{1}{3 G + H}
-  \right]
-  \leftstar{\bm{N}} \otimes \leftstar{\bm{N}}
-\end{align}
+
+    \item If elastic:
+    \begin{equation}
+        \bm{\sigma}
+        = \leftstar{\bm{\sigma}}
+        = \mathbb{C}_\mathrm{e} : \leftstar{\bm{\varepsilon}}_\mathrm{e}
+    \end{equation}
+    The tangent then trivially follows:
+    \begin{equation}
+        \mathbb{C}_\mathrm{ep}
+        =
+        \frac{
+            \partial  \bm{\sigma} \hfill
+        }{
+            \partial \bm{\varepsilon} \hfill
+        }
+        =
+        \frac{
+            \partial ~\bm{\sigma} \hfill
+        }{
+            \partial \;\leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
+        }
+        =
+        \mathbb{C}_\mathrm{e}
+    \end{equation}
+
+    \item If plastic:
+    \begin{align}
+        \bm{\sigma}
+        &= \sigma_\mathrm{m} \bm{I}
+        + \bm{\sigma}_\mathrm{d}
+        \\
+        &= \leftstar{\sigma}_\mathrm{m} \bm{I}
+        + \left( 1- \frac{3 G \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \right)
+        \leftstar{\bm{\sigma}}_\mathrm{d}
+        \\
+        &= \leftstar{\sigma}_\mathrm{m} \bm{I}
+        + \left( 1-\frac{3 G \Delta\gamma}{\leftstar{\sigma}_\mathrm{eq}} \right)
+        2 G \; \leftstar{\bm{\varepsilon}}_\mathrm{e}^\mathrm{d}
+        \\
+        &=
+        \left[
+        \mathbb{C}_\mathrm{e} -
+        \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \, \mathbb{I}_\mathrm{d}
+        \right] : \leftstar{\bm{\varepsilon}}_\mathrm{e}
+    \end{align}
+    The tangent then follows from
+    \begin{align}
+        \mathbb{C}_\mathrm{ep} &=
+        \frac{
+            \partial  \bm{\sigma} \hfill
+        }{
+            \partial \bm{\varepsilon} \hfill
+        } =
+        \frac{
+            \partial ~\bm{\sigma} \hfill
+        }{
+            \partial \;\leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
+        }
+        \\
+        &=
+        \mathbb{C}_\mathrm{e} -
+        \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}}
+        \mathbb{I}_\mathrm{d}
+        + 4 G^2
+        \left[
+            \frac{\Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} -
+            \frac{1}{3 G + H}
+        \right]
+        \leftstar{\bm{N}} \otimes \leftstar{\bm{N}}
+    \end{align}
+
 \end{itemize}
 
 \subsection{Derivation}
 
 \begin{align}
-\frac{
-  \partial \bm{\sigma} \hfill
-}{
-  \partial \leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
-} =
-\mathbb{C}^e
-- \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \mathbb{I}^d
-- \frac{6 G^2}{\leftstar{\sigma}_\mathrm{eq}} \;
-\left( \frac{
-  \partial ~\Delta \gamma \hfill
-}{
-  \partial \leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
-} \right) \otimes
-\leftstar{\bm{\varepsilon}}_\mathrm{e}^d
-+ \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}^2} \;
-\left( \frac{
-  \partial \leftstar{\sigma}_\mathrm{eq} \hfill
-}{
-  \partial \leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
-} \right) \otimes
-\leftstar{\bm{\varepsilon}}_\mathrm{e}^d
+    \frac{
+        \partial \bm{\sigma} \hfill
+    }{
+        \partial \leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
+    } =
+    \mathbb{C}^e
+    - \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}} \mathbb{I}^d
+    - \frac{6 G^2}{\leftstar{\sigma}_\mathrm{eq}} \;
+    \left( \frac{
+        \partial ~\Delta \gamma \hfill
+    }{
+        \partial \leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
+    } \right) \otimes
+    \leftstar{\bm{\varepsilon}}_\mathrm{e}^d
+    + \frac{6 G^2 \Delta \gamma}{\leftstar{\sigma}_\mathrm{eq}^2} \;
+    \left( \frac{
+        \partial \leftstar{\sigma}_\mathrm{eq} \hfill
+    }{
+        \partial \leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
+    } \right) \otimes
+    \leftstar{\bm{\varepsilon}}_\mathrm{e}^d
 \end{align}
 Apply the following:
 \begin{itemize}
+
 \item for the equivalent stress
 \begin{equation}
-  \frac{\partial \sigma_\mathrm{eq}}{\partial \bm{\sigma}}
-  = \frac{\partial \sigma_\mathrm{eq}}{\partial \bm{\sigma}^d}
-  = \frac{\partial}{\partial \bm{\sigma}^d } \left( \sqrt{ \tfrac{3}{2} \bm{\sigma}^d : \bm{\sigma}^d } \right)
-  = \frac{1}{2 \sigma_\mathrm{eq} } \frac{\partial}{\partial \bm{\sigma}^d} \left( \tfrac{3}{2} \bm{\sigma}^d : \bm{\sigma}^d \right)
-  = \frac{3}{2} \frac{\bm{\sigma}^d}{\sigma_\mathrm{eq}} = \bm{N} = \leftstar{\bm{N}}
+    \frac{\partial \sigma_\mathrm{eq}}{\partial \bm{\sigma}}
+    = \frac{\partial \sigma_\mathrm{eq}}{\partial \bm{\sigma}^d}
+    = \frac{\partial}{\partial \bm{\sigma}^d }
+    \left( \sqrt{ \tfrac{3}{2} \bm{\sigma}^d : \bm{\sigma}^d } \right)
+    = \frac{1}{2 \sigma_\mathrm{eq} } \frac{\partial}{\partial \bm{\sigma}^d}
+    \left( \tfrac{3}{2} \bm{\sigma}^d : \bm{\sigma}^d \right)
+    = \frac{3}{2} \frac{\bm{\sigma}^d}{\sigma_\mathrm{eq}} = \bm{N} = \leftstar{\bm{N}}
 \end{equation}
 hence:
 \begin{equation}
-  \frac{
-    \partial \leftstar{\sigma}_\mathrm{eq}
-  }{
-    \partial \leftstar{\bm{\varepsilon}}_\mathrm{e}
-  } =
-  2 G \, \leftstar{\bm{N}}
+    \frac{
+        \partial \leftstar{\sigma}_\mathrm{eq}
+    }{
+        \partial \leftstar{\bm{\varepsilon}}_\mathrm{e}
+    } =
+    2 G \, \leftstar{\bm{N}}
 \end{equation}
+
 \item for the plastic multiplier
 \begin{align}
-  \frac{
-    \partial ~\Delta \gamma \hfill
-  }{
-    \partial  \leftstar{\bm{\varepsilon}}_\mathrm{e}  \hfill
-  }
-  =
-  \left( \frac{
-    \partial ~\Delta \gamma \hfill
-  }{
-    \partial ~\Phi \hfill
-  } \right) \;
-  \left( \frac{
-    \partial \,~\Phi \hfill
-  }{
-    \partial  \,\leftstar{\sigma}_\mathrm{eq} \hfill
-  } \right) \;
-  \left( \frac{
-    \partial \,\leftstar{\sigma}_\mathrm{eq} \hfill
-  }{
-    \partial \,\leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
-  } \right) \;
-  &= \frac{2 G}{3 G + H} \, \leftstar{\bm{N}}
+    \frac{
+        \partial ~\Delta \gamma \hfill
+    }{
+        \partial  \leftstar{\bm{\varepsilon}}_\mathrm{e}  \hfill
+    }
+    =
+    \left( \frac{
+        \partial ~\Delta \gamma \hfill
+    }{
+        \partial ~\Phi \hfill
+    } \right) \;
+    \left( \frac{
+        \partial \,~\Phi \hfill
+    }{
+        \partial  \,\leftstar{\sigma}_\mathrm{eq} \hfill
+    } \right) \;
+    \left( \frac{
+        \partial \,\leftstar{\sigma}_\mathrm{eq} \hfill
+    }{
+        \partial \,\leftstar{\bm{\varepsilon}}_\mathrm{e} \hfill
+    } \right) \;
+    &= \frac{2 G}{3 G + H} \, \leftstar{\bm{N}}
 \end{align}
 \end{itemize}
 
@@ -456,130 +508,126 @@ hence:
 \vspace*{.5eM}
 
 \begin{itemize}
-%
-\item Dyadic tensor product
-\begin{align}
-  \mathbb{C} &= \bm{A} \otimes \bm{B} \\
-  C_{ijkl}   &= A_{ij} \,      B_{kl}
-\end{align}
-%
-\item Double tensor contraction
-\begin{align}
-  C &= \bm{A} : \bm{B} \\
-    &= A_{ij} \, B_{ji}
-\end{align}
-%
+
+    \item Dyadic tensor product
+    \begin{align}
+        \mathbb{C} &= \bm{A} \otimes \bm{B} \\
+        C_{ijkl} &= A_{ij} \, B_{kl}
+    \end{align}
+
+    \item Double tensor contraction
+    \begin{align}
+        C &= \bm{A} : \bm{B} \\
+        &= A_{ij} \, B_{ji}
+    \end{align}
+
 \end{itemize}
 
 \paragraph{Tensor decomposition}
 \vspace*{.5eM}
 
 \begin{itemize}
-%
-\item Deviatoric part $\bm{A}_\mathrm{d}$ of an arbitrary tensor $\bm{A}$:
-\begin{equation}
-  \mathrm{tr}\left( \bm{A}_\mathrm{d} \right) \equiv 0
-\end{equation}
-and thus
-\begin{equation}
-  \bm{A}_\mathrm{d} = \bm{A} - \tfrac{1}{3} \mathrm{tr}\left( \bm{A} \right)
-\end{equation}
-%
+
+    \item Deviatoric part $\bm{A}_\mathrm{d}$ of an arbitrary tensor $\bm{A}$:
+    \begin{equation}
+        \mathrm{tr}\left( \bm{A}_\mathrm{d} \right) \equiv 0
+    \end{equation}
+    and thus
+    \begin{equation}
+      \bm{A}_\mathrm{d} = \bm{A} - \tfrac{1}{3} \mathrm{tr}\left( \bm{A} \right)
+    \end{equation}
+
 \end{itemize}
 
 \paragraph{Fourth order unit tensors}
 \vspace*{.5eM}
 
 \begin{itemize}
-%
-\item Unit tensor:
-\begin{equation}
-  \bm{A} \equiv \mathbb{I} : \bm{A}
-\end{equation}
-and thus
-\begin{equation}
-  \mathbb{I} = \delta_{il} \delta{jk}
-\end{equation}
-%
-\item Right-transposition tensor:
-\begin{equation}
-  \bm{A}^T \equiv \mathbb{I}^{RT} : \bm{A} = \bm{A} : \mathbb{I}^{RT}
-\end{equation}
-and thus
-\begin{equation}
-  \mathbb{I}^{RT} = \delta_{ik} \delta_{jl}
-\end{equation}
-%
-\item Symmetrisation tensor:
-\begin{equation}
-  \mathrm{sym} \left( \bm{A} \right) \equiv \mathbb{I}_\mathrm{s} : \bm{A}
-\end{equation}
-whereby
-\begin{equation}
-  \mathbb{I}_\mathrm{s} = \tfrac{1}{2} \left( \mathbb{I} + \mathbb{I}^{RT} \right)
-\end{equation}
-This follows from the following derivation:
-\begin{align}
-  \mathrm{sym} \left( \bm{A} \right) &= \tfrac{1}{2} \left( \bm{A} + \bm{A}^T \right)
-  \\
-  &= \tfrac{1}{2} \left( \mathbb{I} : \bm{A} + \mathbb{I}^{RT} : \bm{A} \right)
-  \\
-  &= \tfrac{1}{2} \left( \mathbb{I} + \mathbb{I}^{RT} \right) : \bm{A}
-  \\
-  &= \mathbb{I}_\mathrm{s} : \bm{A}
-\end{align}
-%
-\item Deviatoric and symmetric projection tensor
-\begin{equation}
-  \mathrm{dev} \left( \mathrm{sym} \left( \bm{A} \right) \right) \equiv \mathbb{I}_\mathrm{d} : \bm{A}
-\end{equation}
-from which it follows that:
-\begin{equation}
-  \mathbb{I}_\mathrm{d}
-  = \mathbb{I}_\mathrm{s} - \tfrac{1}{3} \bm{I} \otimes \bm{I}
-\end{equation}
-%
+
+    \item Unit tensor:
+    \begin{equation}
+        \bm{A} \equiv \mathbb{I} : \bm{A}
+    \end{equation}
+    and thus
+    \begin{equation}
+        \mathbb{I} = \delta_{il} \delta{jk}
+    \end{equation}
+
+    \item Right-transposition tensor:
+    \begin{equation}
+        \bm{A}^T \equiv \mathbb{I}^{RT} : \bm{A} = \bm{A} : \mathbb{I}^{RT}
+    \end{equation}
+    and thus
+    \begin{equation}
+        \mathbb{I}^{RT} = \delta_{ik} \delta_{jl}
+    \end{equation}
+
+    \item Symmetrisation tensor:
+    \begin{equation}
+        \mathrm{sym} \left( \bm{A} \right) \equiv \mathbb{I}_\mathrm{s} : \bm{A}
+    \end{equation}
+    whereby
+    \begin{equation}
+        \mathbb{I}_\mathrm{s} = \tfrac{1}{2} \left( \mathbb{I} + \mathbb{I}^{RT} \right)
+    \end{equation}
+    This follows from the following derivation:
+    \begin{align}
+        \mathrm{sym} \left( \bm{A} \right) &= \tfrac{1}{2} \left( \bm{A} + \bm{A}^T \right)
+        \\
+        &= \tfrac{1}{2} \left( \mathbb{I} : \bm{A} + \mathbb{I}^{RT} : \bm{A} \right)
+        \\
+        &= \tfrac{1}{2} \left( \mathbb{I} + \mathbb{I}^{RT} \right) : \bm{A}
+        \\
+        &= \mathbb{I}_\mathrm{s} : \bm{A}
+    \end{align}
+
+    \item Deviatoric and symmetric projection tensor
+    \begin{equation}
+        \mathrm{dev} \left( \mathrm{sym}
+        \left( \bm{A} \right) \right) \equiv \mathbb{I}_\mathrm{d} : \bm{A}
+    \end{equation}
+    from which it follows that:
+    \begin{equation}
+        \mathbb{I}_\mathrm{d}
+        = \mathbb{I}_\mathrm{s} - \tfrac{1}{3} \bm{I} \otimes \bm{I}
+    \end{equation}
+
 \end{itemize}
 
 \section{Stress measures}
 \label{sec:ap:stress}
 
 \begin{itemize}
-\item Mean stress
-\begin{equation}
-\sigma_\mathrm{m}
-= \tfrac{1}{3} \, \mathrm{tr} ( \bm{\sigma} )
-= \tfrac{1}{3} \, \bm{\sigma} : \bm{I}
-\end{equation}
-\item Stress deviator
-\begin{equation}
-  \bm{\sigma}_\mathrm{d}
-  = \bm{\sigma} - \sigma_\mathrm{m} \, \bm{I}
-  = \mathbb{I}_\mathrm{d} : \bm{\sigma}
-\end{equation}
-\item Von Mises equivalent stress
-\begin{align}
-\sigma_\mathrm{eq}
-= \sqrt{ \tfrac{3}{2} \, \bm{\sigma}_\mathrm{d} : \bm{\sigma}_\mathrm{d} }
-= \sqrt{ 3 J_2(\bm{\sigma}) }
-\end{align}
-where the second-stress invariant
-\begin{align}
-J_2 = \tfrac{1}{2} \, || \, \bm{\sigma}_\mathrm{d} \, ||^2
-    = \tfrac{1}{2} \, \bm{\sigma}_\mathrm{d} : \bm{\sigma}_\mathrm{d}
-\end{align}
-\end{itemize}
 
-% bibliography
+    \item Mean stress
+    \begin{equation}
+        \sigma_\mathrm{m}
+        = \tfrac{1}{3} \, \mathrm{tr} ( \bm{\sigma} )
+        = \tfrac{1}{3} \, \bm{\sigma} : \bm{I}
+    \end{equation}
+
+    \item Stress deviator
+    \begin{equation}
+        \bm{\sigma}_\mathrm{d}
+        = \bm{\sigma} - \sigma_\mathrm{m} \, \bm{I}
+        = \mathbb{I}_\mathrm{d} : \bm{\sigma}
+    \end{equation}
+
+    \item Von Mises equivalent stress
+    \begin{align}
+        \sigma_\mathrm{eq}
+        = \sqrt{ \tfrac{3}{2} \, \bm{\sigma}_\mathrm{d} : \bm{\sigma}_\mathrm{d} }
+        = \sqrt{ 3 J_2(\bm{\sigma}) }
+    \end{align}
+    where the second-stress invariant
+    \begin{align}
+        J_2 = \tfrac{1}{2} \, || \, \bm{\sigma}_\mathrm{d} \, ||^2
+        = \tfrac{1}{2} \, \bm{\sigma}_\mathrm{d} : \bm{\sigma}_\mathrm{d}
+    \end{align}
+
+\end{itemize}
 
 \scriptsize
 \bibliography{library}
-
-%\begin{abstract}
-%\end{abstract}
-
-%\keywords{}
-
-
 
 \end{document}
