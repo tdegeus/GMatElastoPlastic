@@ -6,14 +6,14 @@
 #
 # In addition, it sets the following variables:
 #
-#     GMatElastoPlastic_FOUND - true if GMatElastoPlastic found
-#     GMatElastoPlastic_VERSION - GMatElastoPlastic's version
-#     GMatElastoPlastic_INCLUDE_DIRS - the directory containing GMatElastoPlastic headers
+#     GMatElastoPlastic_FOUND - true if the library is found
+#     GMatElastoPlastic_VERSION - the library's version
+#     GMatElastoPlastic_INCLUDE_DIRS - directory containing the library's headers
 #
 # The following support targets are defined to simplify things:
 #
 #     GMatElastoPlastic::compiler_warnings - enable compiler warnings
-#     GMatElastoPlastic::assert - enable GMatElastoPlastic assertions
+#     GMatElastoPlastic::assert - enable library assertions
 #     GMatElastoPlastic::debug - enable all assertions (slow)
 
 include(CMakeFindDependencyMacro)
@@ -22,11 +22,14 @@ include(CMakeFindDependencyMacro)
 
 if(NOT TARGET GMatElastoPlastic)
     include("${CMAKE_CURRENT_LIST_DIR}/GMatElastoPlasticTargets.cmake")
-    get_target_property(
-        GMatElastoPlastic_INCLUDE_DIRS
-        GMatElastoPlastic
-        INTERFACE_INCLUDE_DIRECTORIES)
 endif()
+
+# Define "GMatElastoPlastic_INCLUDE_DIRS"
+
+get_target_property(
+    GMatElastoPlastic_INCLUDE_DIRS
+    GMatElastoPlastic
+    INTERFACE_INCLUDE_DIRECTORIES)
 
 # Find dependencies
 
