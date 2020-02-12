@@ -1,15 +1,20 @@
 import GMatElastoPlastic as gmat
-import GooseMPL          as gplt
+import GooseMPL as gplt
 import matplotlib.pyplot as plt
-import numpy             as np
+import numpy as np
 
 plt.style.use(['goose', 'goose-latex'])
 
 # tensor operations
 
-ddot42 = lambda A4,B2: np.einsum('ijkl,lk->ij',A4,B2)
-ddot22 = lambda A2,B2: np.einsum('ij,ji',A2,B2)
-norm   = lambda A2   : np.abs(np.einsum('ij,ji',A2,A2))
+def ddot42(A4, B2):
+    return np.einsum('ijkl,lk->ij', A4, B2)
+
+def ddot22(A2, B2):
+    return np.einsum('ij,ji', A2, B2)
+
+def norm(A2):
+    return np.abs(np.einsum('ij,ji', A2, A2))
 
 # define material model
 
@@ -21,31 +26,31 @@ ninc = 301
 
 for igamma, gamma in enumerate(np.linspace(0.0, 0.1, ninc)):
 
-  mat.increment()
+    mat.increment()
 
-  Eps0 = np.array([
-    [  0.0, gamma,   0.0],
-    [gamma,   0.0,   0.0],
-    [  0.0,   0.0,   0.0],
-  ])
+    Eps0 = np.array([
+        [0.0, gamma, 0.0],
+        [gamma, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+    ])
 
-  Sig0, C4 = mat.Tangent(Eps0)
+    Sig0, C4 = mat.Tangent(Eps0)
 
 # consistency check
 
-x = np.logspace(-16,0,100)
+x = np.logspace(-16, 0, 100)
 y = np.zeros(x.shape)
 
 for i in range(len(x)):
 
-  dEps = np.random.random((3,3)) * x[i]
-  dEps = 0.5 * (dEps + dEps.T)
+    dEps = np.random.random((3, 3)) * x[i]
+    dEps = 0.5 * (dEps + dEps.T)
 
-  Sig = mat.Stress(Eps0 + dEps)
+    Sig = mat.Stress(Eps0 + dEps)
 
-  dSig = Sig - Sig0
+    dSig = Sig - Sig0
 
-  y[i] = norm(dSig - ddot42(C4, dEps)) / norm(dSig)
+    y[i] = norm(dSig - ddot42(C4, dEps)) / norm(dSig)
 
 # plot result
 
@@ -63,10 +68,10 @@ ax.set_xlabel(r'$|| \delta \bm{\varepsilon} ||$')
 ax.set_ylabel(r'$\eta$')
 
 gplt.plot_powerlaw(-2, 0.0, 1.0, 0.5, axis=ax, units='relative', color='k', linewidth=1,
-  label=r'rounding error: $|| \delta \bm{\varepsilon} ||^{-2}$')
+                   label=r'rounding error: $|| \delta \bm{\varepsilon} ||^{-2}$')
 
 gplt.plot_powerlaw(+2, 0.5, 0.0, 0.5, axis=ax, units='relative', color='k', linewidth=1, linestyle='--',
-  label=r'linearisation error: $|| \delta \bm{\varepsilon} ||^{+2}$')
+                   label=r'linearisation error: $|| \delta \bm{\varepsilon} ||^{+2}$')
 
 ax.legend()
 
