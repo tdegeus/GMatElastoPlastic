@@ -7,159 +7,88 @@
 #ifndef GMATELASTOPLASTIC_CARTESIAN3D_H
 #define GMATELASTOPLASTIC_CARTESIAN3D_H
 
+#include <GMatTensor/Cartesian3d.h>
+#include <GMatElastic/Cartesian3d.h>
+
 #include "config.h"
 
 namespace GMatElastoPlastic {
 namespace Cartesian3d {
 
-// Alias
-
-using Tensor2 = xt::xtensor_fixed<double, xt::xshape<3, 3>>;
-using Tensor4 = xt::xtensor_fixed<double, xt::xshape<3, 3, 3, 3>>;
-
 // Unit tensors
 
-inline Tensor2 I2();
-inline Tensor4 II();
-inline Tensor4 I4();
-inline Tensor4 I4rt();
-inline Tensor4 I4s();
-inline Tensor4 I4d();
+using GMatTensor::Cartesian3d::I2;
+using GMatTensor::Cartesian3d::II;
+using GMatTensor::Cartesian3d::I4;
+using GMatTensor::Cartesian3d::I4rt;
+using GMatTensor::Cartesian3d::I4s;
+using GMatTensor::Cartesian3d::I4d;
 
-// Hydrostatic part of a tensor
+// Tensor decomposition
 
-inline double Hydrostatic(const Tensor2& A);
-
-// Deviatoric part of a tensor
-
-inline Tensor2 Deviatoric(const Tensor2& A);
-
-// Equivalent deviatoric stress/stress
-
-inline double Sigeq(const Tensor2& Sig);
-inline double Epseq(const Tensor2& Eps);
-
-// List version of the functions above (no allocation)
-
-inline void hydrostatic(const xt::xtensor<double,3>& A, xt::xtensor<double,1>& Am);
-inline void deviatoric(const xt::xtensor<double,3>& A, xt::xtensor<double,3>& Ad);
-inline void sigeq(const xt::xtensor<double,3>& Sig, xt::xtensor<double,1>& Sigeq);
-inline void epseq(const xt::xtensor<double,3>& Eps, xt::xtensor<double,1>& Epseq);
-
-// Auto-allocation allocation of the functions above
-
-inline xt::xtensor<double,1> Hydrostatic(const xt::xtensor<double,3>& A);
-inline xt::xtensor<double,3> Deviatoric(const xt::xtensor<double,3>& A);
-inline xt::xtensor<double,1> Sigeq(const xt::xtensor<double,3>& Sig);
-inline xt::xtensor<double,1> Epseq(const xt::xtensor<double,3>& Eps);
-
-// Matrix version of the functions above (no allocation)
-
-inline void hydrostatic(const xt::xtensor<double,4>& A, xt::xtensor<double,2>& Am);
-inline void deviatoric(const xt::xtensor<double,4>& A, xt::xtensor<double,4>& Ad);
-inline void sigeq(const xt::xtensor<double,4>& Sig, xt::xtensor<double,2>& Sigeq);
-inline void epseq(const xt::xtensor<double,4>& Eps, xt::xtensor<double,2>& Epseq);
-
-// Auto-allocation allocation of the functions above
-
-inline xt::xtensor<double,2> Hydrostatic(const xt::xtensor<double,4>& A);
-inline xt::xtensor<double,4> Deviatoric(const xt::xtensor<double,4>& A);
-inline xt::xtensor<double,2> Sigeq(const xt::xtensor<double,4>& Sig);
-inline xt::xtensor<double,2> Epseq(const xt::xtensor<double,4>& Eps);
+using GMatTensor::Cartesian3d::hydrostatic;
+using GMatTensor::Cartesian3d::Hydrostatic;
+using GMatTensor::Cartesian3d::deviatoric;
+using GMatTensor::Cartesian3d::Deviatoric;
+using GMatElastic::Cartesian3d::sigeq;
+using GMatElastic::Cartesian3d::Sigeq;
+using GMatElastic::Cartesian3d::epseq;
+using GMatElastic::Cartesian3d::Epseq;
 
 // Material point
 
-class Elastic
+class Elastic : public GMatElastic::Cartesian3d::Elastic
 {
 public:
-
-    // Constructors
     Elastic() = default;
     Elastic(double K, double G);
-
-    // Parameters
-    double K() const;
-    double G() const;
-
-    // Stress (no allocation, overwrites "Sig")
-    template <class U>
-    void stress(const Tensor2& Eps, U&& Sig) const;
-
-    // Stress (auto allocation)
-    Tensor2 Stress(const Tensor2& Eps) const;
-
-    // Stress & Tangent (no allocation, overwrites "Sig" and "C")
-    template <class U, class V>
-    void tangent(const Tensor2& Eps, U&& Sig, V&& C) const;
-
-    // Stress & Tangent (auto allocation)
-    std::tuple<Tensor2, Tensor4> Tangent(const Tensor2& Eps) const;
-
-private:
-
-    double m_K; // bulk modulus
-    double m_G; // shear modulus
 };
 
 // Material point
 
-class alignas(XTENSOR_DEFAULT_ALIGNMENT) LinearHardening
+class LinearHardening
 {
 public:
-
-    // Constructors
     LinearHardening() = default;
     LinearHardening(double K, double G, double sigy0, double H);
 
-    // Parameters
     double K() const;
     double G() const;
     double sigy0() const;
     double H() const;
-
-    // Stress (no allocation, overwrites "Sig")
-    template <class U>
-    void stress(const Tensor2& Eps, U&& Sig);
-
-    // Stress (auto allocation)
-    Tensor2 Stress(const Tensor2& Eps);
-
-    // Stress & Tangent (no allocation, overwrites "Sig" and "C")
-    template <class U, class V>
-    void tangent(const Tensor2& Eps, U&& Sig, V&& C);
-
-    // Stress & Tangent (auto allocation)
-    std::tuple<Tensor2, Tensor4> Tangent(const Tensor2& Eps);
-
-    // Increment (update plastic strain)
-    void increment();
-
-    // Plastic strain
     double epsp() const;
+    void increment(); // update history
+
+    template <class T> void setStrain(const T& arg, bool compute_tangent = true);
+    template <class T> void strain(T& ret) const;
+    template <class T> void stress(T& ret) const;
+    template <class T> void tangent(T& ret) const;
+
+    template <class T> void setStrainPtr(const T* arg, bool compute_tangent = true);
+    template <class T> void strainPtr(T* ret) const;
+    template <class T> void stressPtr(T* ret) const;
+    template <class T> void tangentPtr(T* ret) const;
+
+    xt::xtensor<double, 2> Strain() const;
+    xt::xtensor<double, 2> Stress() const;
+    xt::xtensor<double, 4> Tangent() const;
 
 private:
-
-    double m_K;     // bulk modulus
-    double m_G;     // shear modulus
-    double m_sigy0; // initial yield stress
-    double m_H;     // hardening modulus
-
-    // plastic strain
-    double m_epsp = 0.0;
-    double m_epsp_t = 0.0;
-
-    // elastic strain tensor
-    Tensor2 m_Epse
-        = Tensor2({{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}});
-    Tensor2 m_Epse_t
-        = Tensor2({{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}});
-
-    // strain tensor
-    Tensor2 m_Eps
-        = Tensor2({{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}});
-    Tensor2 m_Eps_t
-        = Tensor2({{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}});
+    double m_K;      // bulk modulus
+    double m_G;      // shear modulus
+    double m_sigy0;  // initial yield stress
+    double m_H;      // hardening modulus
+    double m_epsp;   // plastic strain
+    double m_epsp_t; // ,, previous time step
+    xt::xtensor<double, 2> m_Eps;    // strain tensor [xx, xy, xz, yx, yy, yz, zx, zy, zz]
+    xt::xtensor<double, 2> m_Eps_t;  // ,, previous time step
+    xt::xtensor<double, 2> m_Epse;   // elastic strain tensor
+    xt::xtensor<double, 2> m_Epse_t; // ,, previous time step
+    xt::xtensor<double, 2> m_Sig;    // stress tensor
+    xt::xtensor<double, 4> m_C;      // tangent
 };
+
+// Material identifier
 
 struct Type {
     enum Value {
@@ -169,149 +98,116 @@ struct Type {
     };
 };
 
-// Matrix of material points
+// Array of material points
 
-class Matrix
+template <size_t N>
+class Array : public GMatTensor::Cartesian3d::Array<N>
 {
 public:
+    using GMatTensor::Cartesian3d::Array<N>::rank;
 
     // Constructors
 
-    Matrix() = default;
-    Matrix(size_t nelem, size_t nip);
+    Array() = default;
+    Array(const std::array<size_t, N>& shape);
 
-    // Shape
-
-    size_t ndim() const;
-    size_t nelem() const;
-    size_t nip() const;
+    // Overloaded methods:
+    // - "shape"
+    // - unit tensors: "I2", "II", "I4", "I4rt", "I4s", "I4d"
 
     // Type
 
-    xt::xtensor<size_t,2> type() const;
-    xt::xtensor<size_t,2> isElastic() const;
-    xt::xtensor<size_t,2> isPlastic() const;
-    xt::xtensor<size_t,2> isLinearHardening() const;
+    xt::xtensor<size_t, N> type() const;
+    xt::xtensor<size_t, N> isElastic() const;
+    xt::xtensor<size_t, N> isPlastic() const;
+    xt::xtensor<size_t, N> isLinearHardening() const;
 
     // Parameters
 
-    xt::xtensor<double,2> K() const;
-    xt::xtensor<double,2> G() const;
-
-    // Matrix of unit tensors
-
-    xt::xtensor<double,4> I2() const;
-    xt::xtensor<double,6> II() const;
-    xt::xtensor<double,6> I4() const;
-    xt::xtensor<double,6> I4rt() const;
-    xt::xtensor<double,6> I4s() const;
-    xt::xtensor<double,6> I4d() const;
-
-    // Check that a type has been set everywhere (throws if unset points are found)
-
-    void check() const;
+    xt::xtensor<double, N> K() const;
+    xt::xtensor<double, N> G() const;
+    xt::xtensor<double, N> epsp() const;
 
     // Set parameters for a batch of points
+    // (uniform for all points specified: that have "I(i, j) == 1")
 
     void setElastic(
-        const xt::xtensor<size_t,2>& I,
+        const xt::xtensor<size_t, N>& I,
         double K,
         double G);
 
     void setLinearHardening(
-        const xt::xtensor<size_t,2>& I,
+        const xt::xtensor<size_t, N>& I,
         double K,
         double G,
         double sigy0,
         double H);
 
-    // Set material definition for a batch of points
+    // Set parameters for a batch of points:
+    // each to the same material, but with different parameters:
+    // the matrix "idx" refers to a which entry to use: "K(idx)", "G(idx)", or "epsy(idx,:)"
 
     void setElastic(
-        const xt::xtensor<size_t,2>& I,
-        const xt::xtensor<size_t,2>& idx,
-        const xt::xtensor<double,1>& K,
-        const xt::xtensor<double,1>& G);
+        const xt::xtensor<size_t, N>& I,
+        const xt::xtensor<size_t, N>& idx,
+        const xt::xtensor<double, 1>& K,
+        const xt::xtensor<double, 1>& G);
 
     void setLinearHardening(
-        const xt::xtensor<size_t,2>& I,
-        const xt::xtensor<size_t,2>& idx,
-        const xt::xtensor<double,1>& K,
-        const xt::xtensor<double,1>& G,
-        const xt::xtensor<double,1>& sigy0,
-        const xt::xtensor<double,1>& H);
+        const xt::xtensor<size_t, N>& I,
+        const xt::xtensor<size_t, N>& idx,
+        const xt::xtensor<double, 1>& K,
+        const xt::xtensor<double, 1>& G,
+        const xt::xtensor<double, 1>& sigy0,
+        const xt::xtensor<double, 1>& H);
 
-    // Compute (no allocation, overwrites last argument)
+    // Set strain tensor, get the response
 
-    void stress(
-        const xt::xtensor<double,4>& Eps,
-              xt::xtensor<double,4>& Sig);
-
-    void tangent(
-        const xt::xtensor<double,4>& Eps,
-              xt::xtensor<double,4>& Sig,
-              xt::xtensor<double,6>& C);
-
-    // Extract information
-
-    void epsp(xt::xtensor<double,2>& epsp) const;
-
-    // Update history of all material points
-
-    void increment();
+    void setStrain(const xt::xtensor<double, N + 2>& arg, bool compute_tangent = true);
+    void strain(xt::xtensor<double, N + 2>& ret) const;
+    void stress(xt::xtensor<double, N + 2>& ret) const;
+    void tangent(xt::xtensor<double, N + 4>& ret) const;
+    void epsp(xt::xtensor<double, N>& ret) const;
+    void increment(); // update history variables
 
     // Auto-allocation of the functions above
 
-    xt::xtensor<double,4> Stress(const xt::xtensor<double,4>& Eps);
+    xt::xtensor<double, N + 2> Strain() const;
+    xt::xtensor<double, N + 2> Stress() const;
+    xt::xtensor<double, N + 4> Tangent() const;
+    xt::xtensor<double, N> Epsp() const;
 
-    std::tuple<xt::xtensor<double,4>, xt::xtensor<double,6>>
-    Tangent(const xt::xtensor<double,4>& Eps);
+    // Get copy or reference to the underlying model at on point
 
-    xt::xtensor<double,2> Epsp() const;
+    auto getElastic(const std::array<size_t, N>& index) const;
+    auto getLinearHardening(const std::array<size_t, N>& index) const;
+    auto* refElastic(const std::array<size_t, N>& index);
+    auto* refLinearHardening(const std::array<size_t, N>& index);
 
 private:
-
-    // Material vectors (enforce alignment for xsimd)
-
+    // Material vectors
     std::vector<Elastic> m_Elastic;
-
-    std::vector<LinearHardening, XTENSOR_DEFAULT_ALLOCATOR(LinearHardening)> m_LinearHardening;
+    std::vector<LinearHardening> m_LinearHardening;
 
     // Identifiers for each matrix entry
-    xt::xtensor<size_t,2> m_type;  // type (e.g. "Type::Elastic")
-    xt::xtensor<size_t,2> m_index; // index from the relevant material vector (e.g. "m_Elastic")
+    xt::xtensor<size_t, N> m_type;  // type (e.g. "Type::Elastic")
+    xt::xtensor<size_t, N> m_index; // index from the relevant material vector (e.g. "m_Elastic")
 
     // Shape
-    size_t m_nelem;
-    size_t m_nip;
-    static const size_t m_ndim = 3;
-
-    // Internal check
-    bool m_allSet = false; // true if all points have a material assigned
-    void checkAllSet(); // check if all points have a material assigned (modifies "m_allSet")
+    using GMatTensor::Cartesian3d::Array<N>::m_ndim;
+    using GMatTensor::Cartesian3d::Array<N>::m_stride_tensor2;
+    using GMatTensor::Cartesian3d::Array<N>::m_stride_tensor4;
+    using GMatTensor::Cartesian3d::Array<N>::m_size;
+    using GMatTensor::Cartesian3d::Array<N>::m_shape;
+    using GMatTensor::Cartesian3d::Array<N>::m_shape_tensor2;
+    using GMatTensor::Cartesian3d::Array<N>::m_shape_tensor4;
 };
-
-// Internal support functions
-
-// Trace: "c = A_ii"
-template <class U>
-inline double trace(const U& A);
-
-// Dyadic product
-template <class U, class V, class W>
-inline void A2_dyadic_B2(const U& A, const V& B, W& C);
-
-// Tensor contraction: "c = A_ij * B_ji"
-// Symmetric tensors only, no assertion
-template <class U, class V>
-inline double A2_ddot_B2(const U& A, const V& B);
 
 } // namespace Cartesian3d
 } // namespace GMatElastoPlastic
 
-#include "Cartesian3d.hpp"
+#include "Cartesian3d_Array.hpp"
 #include "Cartesian3d_Elastic.hpp"
 #include "Cartesian3d_LinearHardening.hpp"
-#include "Cartesian3d_Matrix.hpp"
 
 #endif

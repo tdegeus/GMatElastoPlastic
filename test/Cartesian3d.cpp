@@ -1,81 +1,148 @@
 
 #include <catch2/catch.hpp>
-
-#define EQ(a,b) REQUIRE_THAT((a), Catch::WithinAbs((b), 1.e-12));
-
+#include <xtensor/xrandom.hpp>
 #include <GMatElastoPlastic/Cartesian3d.h>
 
 namespace GM = GMatElastoPlastic::Cartesian3d;
 
+template <class T, class S>
+S A4_ddot_B2(const T& A, const S& B)
+{
+    S C = xt::empty<double>({3, 3});
+    C.fill(0.0);
+
+    for (size_t i = 0; i < 3; i++) {
+        for (size_t j = 0; j < 3; j++) {
+            for (size_t k = 0; k < 3; k++) {
+                for (size_t l = 0; l < 3; l++) {
+                    C(i, j) += A(i, j, k, l) * B(l, k);
+                }
+            }
+        }
+    }
+
+    return C;
+}
+
 TEST_CASE("GMatElastoPlastic::Cartesian3d", "Cartesian3d.h")
 {
-
-double K = 12.3;
-double G = 45.6;
-
-GM::Tensor2 Eps;
-GM::Tensor2 Sig;
-
-double gamma = 0.02;
-double epsm = 0.12;
-
-Eps.fill(0.0);
-Eps(0,0) = Eps(1,1) = Eps(2,2) = epsm;
-Eps(0,1) = Eps(1,0) = gamma;
-
-SECTION("Elastic")
-{
-  GM::Elastic mat(K, G);
-
-    Sig = mat.Stress(Eps);
-
-    EQ(Sig(0,0), 3.0 * K * epsm);
-    EQ(Sig(1,1), 3.0 * K * epsm);
-    EQ(Sig(2,2), 3.0 * K * epsm);
-    EQ(Sig(0,1), 2.0 * G * gamma);
-    EQ(Sig(1,0), 2.0 * G * gamma);
-    EQ(Sig(0,2), 0.0);
-    EQ(Sig(1,2), 0.0);
-    EQ(Sig(2,0), 0.0);
-    EQ(Sig(2,1), 0.0);
-}
-
-SECTION("Matrix")
-{
-  size_t nelem = 3;
-  size_t nip = 2;
-
-    GM::Matrix mat(nelem, nip);
-
+    SECTION("Elastic")
     {
-        xt::xtensor<size_t,2> I = xt::ones<size_t>({nelem, nip});
-        mat.setElastic(I, K, G);
+        double K = 12.3;
+        double G = 45.6;
+        double gamma = 0.02;
+        double epsm = 0.12;
+
+        xt::xtensor<double, 2> Eps = {
+            {epsm, gamma, 0.0},
+            {gamma, epsm, 0.0},
+            {0.0, 0.0, epsm}};
+
+        xt::xtensor<double, 2> Sig = {
+            {3.0 * K * epsm, 2.0 * G * gamma, 0.0},
+            {2.0 * G * gamma, 3.0 * K * epsm, 0.0},
+            {0.0, 0.0, 3.0 * K * epsm}};
+
+        GM::Elastic mat(K, G);
+        mat.setStrain(Eps);
+
+        REQUIRE(xt::allclose(mat.Stress(), Sig));
     }
 
-    xt::xtensor<double,4> eps = xt::empty<double>({nelem, nip, 3ul, 3ul});
+    SECTION("Tangent (purely elastic response only) - Elastic")
+    {
+        double K = 12.3;
+        double G = 45.6;
 
-    for (size_t e = 0; e < nelem; ++e) {
-        for (size_t q = 0; q < nip; ++q) {
-            xt::view(eps, e, q) = Eps;
+        xt::xtensor<double, 2> Eps = xt::random::randn<double>({3, 3});
+        xt::xtensor<double, 4> Is = GM::I4s();
+        Eps = A4_ddot_B2(Is, Eps);
+
+        GM::Elastic mat(K, G);
+        mat.setStrain(Eps);
+        auto Sig = mat.Stress();
+        auto C = mat.Tangent();
+        REQUIRE(xt::allclose(A4_ddot_B2(C, Eps), Sig));
+    }
+
+    SECTION("Array")
+    {
+        double K = 12.3;
+        double G = 45.6;
+        double gamma = 0.02;
+        double epsm = 0.12;
+
+        xt::xtensor<double, 2> Eps = {
+            {epsm, gamma, 0.0},
+            {gamma, epsm, 0.0},
+            {0.0, 0.0, epsm}};
+
+        xt::xtensor<double, 2> Sig = {
+            {3.0 * K * epsm, 2.0 * G * gamma, 0.0},
+            {2.0 * G * gamma, 3.0 * K * epsm, 0.0},
+            {0.0, 0.0, 3.0 * K * epsm}};
+
+        size_t nelem = 3;
+        size_t nip = 2;
+        size_t ndim = 3;
+
+        GM::Array<2> mat({nelem, nip});
+
+        {
+            xt::xtensor<size_t,2> I = xt::ones<size_t>({nelem, nip});
+            mat.setElastic(I, K, G);
+        }
+
+        xt::xtensor<double, 4> eps = xt::empty<double>({nelem, nip, ndim, ndim});
+        xt::xtensor<double, 4> sig = xt::empty<double>({nelem, nip, ndim, ndim});
+
+        for (size_t e = 0; e < nelem; ++e) {
+            for (size_t q = 0; q < nip; ++q) {
+                double fac = static_cast<double>((e + 1) * nip + (q + 1));
+                xt::view(eps, e, q) = fac * Eps;
+                xt::view(sig, e, q) = fac * Sig;
+            }
+        }
+
+        mat.setStrain(eps);
+
+        REQUIRE(xt::allclose(mat.Stress(), sig));
+    }
+
+    SECTION("Array - Model")
+    {
+        double K = 12.3;
+        double G = 45.6;
+        double gamma = 0.02;
+        double epsm = 0.12;
+
+        xt::xtensor<double, 2> Eps = {
+            {epsm, gamma, 0.0},
+            {gamma, epsm, 0.0},
+            {0.0, 0.0, epsm}};
+
+        xt::xtensor<double, 2> Sig = {
+            {3.0 * K * epsm, 2.0 * G * gamma, 0.0},
+            {2.0 * G * gamma, 3.0 * K * epsm, 0.0},
+            {0.0, 0.0, 3.0 * K * epsm}};
+
+        size_t nelem = 3;
+        size_t nip = 2;
+
+        GM::Array<2> mat({nelem, nip});
+
+        {
+            xt::xtensor<size_t,2> I = xt::ones<size_t>({nelem, nip});
+            mat.setElastic(I, K, G);
+        }
+
+        for (size_t e = 0; e < nelem; ++e) {
+            for (size_t q = 0; q < nip; ++q) {
+                double fac = static_cast<double>((e + 1) * nip + (q + 1));
+                auto model = mat.getElastic({e, q});
+                model.setStrain(xt::eval(fac * Eps));
+                REQUIRE(xt::allclose(model.Stress(), fac * Sig));
+            }
         }
     }
-
-    auto sig = mat.Stress(eps);
-
-    for (size_t e = 0; e < nelem; ++e) {
-        for (size_t q = 0; q < nip; ++q) {
-            EQ(sig(e,q,0,0), 3.0 * K * epsm);
-            EQ(sig(e,q,1,1), 3.0 * K * epsm);
-            EQ(sig(e,q,2,2), 3.0 * K * epsm);
-            EQ(sig(e,q,0,1), 2.0 * G * gamma);
-            EQ(sig(e,q,1,0), 2.0 * G * gamma);
-        }
-    }
-
-    REQUIRE(xt::allclose(xt::view(sig, xt::all(), xt::all(), xt::keep(0), xt::keep(2)), 0.0));
-    REQUIRE(xt::allclose(xt::view(sig, xt::all(), xt::all(), xt::keep(1), xt::keep(2)), 0.0));
-    REQUIRE(xt::allclose(xt::view(sig, xt::all(), xt::all(), xt::keep(2), xt::keep(0)), 0.0));
-    REQUIRE(xt::allclose(xt::view(sig, xt::all(), xt::all(), xt::keep(2), xt::keep(1)), 0.0));
-}
-
 }
