@@ -15,9 +15,9 @@ conveniently compiled to this [PDF](docs/readme.pdf).
     - [C++ and Python](#c-and-python)
     - [Cartesian3d](#cartesian3d)
         - [Overview](#overview)
+        - [Example](#example)
         - [Function names](#function-names)
         - [Storage](#storage)
-        - [Example](#example)
     - [Debugging](#debugging)
 - [Installation](#installation)
     - [C++ headers](#c-headers)
@@ -80,43 +80,14 @@ At the material point level different models are implemented with different clas
 
 +   `Elastic`: the elastic material model that corresponds to
     the elastic part of the elasto-plastic material model.
+    Note: taken from *GMatElastic*.
 +   `LinearHardening`: the elasto-plastic material model with linear hardening.
 
-There is a `Matrix` class that allows you to combine all these material models and
-have a single API for a matrix of material points. 
+There is an `Array` class that allows you to combine all these material models and
+have a single API for an array of material points. 
 
-### Function names
-
-+   Functions whose name starts with a capital letter (e.g. `Stress`) 
-    return their result (allocating it internally).
-+   Functions whose name starts with a small letter (e.g. `stress`) 
-    write to the, fully allocated, last input argument(s) 
-    (avoiding re-allocation, but making the user responsible to do it properly).
-
-### Storage
-
-+   Scalar
-    ```cpp
-    double
-    ```
-
-+   2nd-order tensor
-    ```cpp
-    xt::xtensor_fixed<double, xt::xshape<3, 3>> = 
-    GMatElastoPlastic::Cartesian3d::Tensor2
-    ```
-
-+   List *(i)* of second order tensors *(x,y)* : *A(i,x,y)*
-    ```cpp
-    xt::xtensor<double,3>
-    ```
-    Note that the shape is `[I, 3, 3]`.
-
-+   Matrix *(i,j)* of second order tensors *(x,y)* : *A(i,j,x,y)*
-    ```cpp
-    xt::xtensor<double,4>
-    ```
-    Note that the shape is `[I, J, 3, 3]`.
+>   Note that all strain tensors are presumed symmetric. 
+>   No checks are made to ensure this.
 
 ### Example
 
@@ -136,15 +107,19 @@ int main()
     GMat::LinearHardening plastic(K, G, sigy0, H);
     ...
     
-    // set strain tensor (follows e.g. from FEM discretisation)
-    GMat::Tensor2 Eps;
+    // set strain (follows e.g. from FEM discretisation)
+    xt::xtensor<double, 2> Eps;
     ...
+    elastic.setStrain(Eps);
+    plastic.setStrain(Eps);
     
     // compute stress (including allocation of the result)
-    GMat::Tensor2 Sig = elastic.Stress(Eps);
+    auto Sig = elastic.Stress();
+    auto Sig = plastic.Stress();
     // OR compute stress without (re)allocating the results
     // in this case "Sig" has to be of the correct type and shape
-    elastic.stress(Eps, Sig); 
+    elastic.stress(Sig); 
+    plastic.stress(Sig); 
     ...
 
     return 0;
@@ -160,8 +135,10 @@ namespace GMat = GMatElastoPlastic::Cartesian3d;
 
 int main()
 {
-    // a matrix, of shape [nelem, nip], of material points
-    GMat::Elastic matrix(nelem, nip);
+    size_t ndim = 3;
+    
+    // array, of shape [nelem, nip], of material points
+    GMat::Array<2> array({nelem, nip});
 
     // set materials:
     // points where I(x,y) == 1 are assigned, points where I(x,y) == 0 are skipped
@@ -171,19 +148,56 @@ int main()
     ...
 
     // set strain tensor (follows e.g. from FEM discretisation)
-    xt::xtensor<double,4> eps = xt::empty<double>({nelem, nip, 3ul, 3ul});
+    xt::xtensor<double,4> eps = xt::empty<double>({nelem, nip, ndim, ndim});
     ... 
 
     // compute stress (allocate result)
-    xt::xtensor<double,4> sig = matrix.Stress(eps);
+    xt::xtensor<double,4> sig = array.Stress();
     // OR compute stress without (re)allocating the results
     // in this case "sig" has to be of the correct type and shape
-    matrix.stress(eps, sig); 
+    array.stress(sig); 
     ...
 
     return 0;
 }
 ```
+
+### Function names
+
++   Functions whose name starts with a capital letter (e.g. `Stress`) 
+    return their result (allocating it internally).
++   Functions whose name starts with a small letter (e.g. `stress`) 
+    write to the, fully allocated, last input argument(s) 
+    (avoiding re-allocation, but making the user responsible to do it properly).
+
+### Storage
+
++   Scalar
+    ```cpp
+    double
+    ```
+    or
+    ```cpp
+    xt::xtensor<double, 0>
+    ```
+
++   Tensors
+    ```cpp
+    xt:xtensor<double, 2> // 2nd-order tensor
+    xt:xtensor<double, 4> // 4th-order tensor
+    ```
+
++   List *(i)* of second order tensors *(x,y)* : *A(i,x,y)*
+    ```cpp
+    xt::xtensor<double,3>
+    ```
+    Note that the shape is `[I, 3, 3]`.
+
++   Matrix *(i,j)* of second order tensors *(x,y)* : *A(i,j,x,y)*
+    ```cpp
+    xt::xtensor<double,4>
+    ```
+    Note that the shape is `[I, J, 3, 3]`.
 
 ## Debugging
 
@@ -284,7 +298,7 @@ target_link_libraries(example PRIVATE GMatElastoPlastic)
 The following targets are available:
 
 *   `GMatElastoPlastic`
-    Includes *GMatElastoPlastic* and the *xtensor* dependency.
+    Includes *GMatElastoPlastic* and the *GMatTensor*, *GMatElastic*, and *xtensor* dependencies.
 
 *   `GMatElastoPlastic::assert`
     Enables assertions by defining `GMATELASTOPLASTIC_ENABLE_ASSERT`.
@@ -337,6 +351,108 @@ c++ `pkg-config --cflags GMatElastoPlastic` ...
 Note that you have to take care of the *xtensor* dependency, the C++ version, optimization, 
 enabling *xsimd*, ...
 
+# Testing
+
+## Basic testing
+
+>   Run by the continuous integration
+
+```
+cd build
+cmake .. -DBUILD_TESTS=1
+make
+./test/unit-tests
+```
+
+## Extensive testing
+
+>   Run by the continuous integration.
+>   See [ci.yaml](.github/workflows/ci.yml) for details.
+
+To make sure that the current version in up-to-date with old versions,
+one starts by generating a set or random states using the current version:
+
+```
+cd test/compare_versions
+python Cartesian3d_generate.py
+```
+
+And then checks that the generated states are also found with previous
+versions:
+
+```
+git checkout tags/v0.1.0
+python setup.py build
+python setup.py install
+python Cartesian3d_check_v0.1.0.py
+```
+
+etc.
+
+See [ci.yaml](.github/workflows/ci.yml) for details.
+
 # References / Credits
 
 +   [xtensor](https://github.com/QuantStack/xtensor) is used under the hood.
+
+# Upgrading instructions
+
+## Upgrading to >v0.2.*
+
+`xtensor_fixed` was completely deprecated in v0.2.0, as were the type aliases 
+`Tensor2` and `Tensor4`. 
+Please update your code as follows:
+
+*   `Tensor2` -> `xt::xtensor<double, 2>`.
+*   `Tensor4` -> `xt::xtensor<double, 4>`.
+
+**Tip:** Used `auto` as return type as much as possible.
+This simplifies implementation, and renders is less subjective to library 
+return type changes.
+
+Compared to v0.1.0, v0.2.0 has some generalisations and efficiency updates. 
+This requires the following changes:
+
+*   `Matrix` has been generalised to `Array<rank>`. Practically this requires changing:
+    -   `Matrix` to `Array<2>` in C++.
+    -   `Matrix` to `Array2d` in Python. 
+        Note that `Array1d`, `Array3d`, are also available.
+
+*   `Array<rank>.check` -> 
+    ```cpp
+    if (xt::any(xt::equal(array.type(), Type::Unset))) {
+        throw std::runtime_error("Please set all points");
+    }
+    ```
+    Note however that it is no longer required to set all points, 
+    unset points are filled-up with zeros.
+
+*   Strain is now stored as a member. 
+    Functions like `stress` now return the state based on the last specified strain, 
+    specified using `setStrain(Esp)`. This leads to the following changes:
+    - `stress`: no argument.
+    - `tangent`: no argument, single return value (no longer returns stress).
+
+# Change-log
+
+## v0.2.0
+
+Compared to v0.1.0, v0.2.0 has some generalisations and efficiency updates. 
+This requires the following changes:
+
+*   `Matrix` has been generalised to `Array<rank>`. Practically this requires changing:
+    -   `Matrix` to `Array<2>` in C++.
+    -   `Matrix` to `Array2d` in Python. 
+        Note that `Array1d`, `Array3d`, are also available.
+
+*   `Array` now sets zeros for all `Type::Unset` points. 
+    The function `check` is deprecated accordingly.
+
+*   Strain is now stored as a member. 
+    Functions like `stress` now return the state based on the last specified strain, 
+    specified using `setStrain(Esp)`. This leads to the following changes:
+    - `stress`: no argument.
+    - `tangent`: no argument, single return value (no longer returns stress).
+
+*   Tensor operations are now provided centrally in the GMat eco-system, 
+    by GMatTensor
