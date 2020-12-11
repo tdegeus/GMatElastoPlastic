@@ -11,15 +11,12 @@ option(BUILD_TESTS "${PROJECT_NAME} Build tests" OFF)
 # Version
 # =======
 
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/GMatElastoPlastic/config.h"
-             _GMAT_version_defines
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/GMatElastoPlastic/config.h" _GMAT_ver
      REGEX "#define GMATELASTOPLASTIC_VERSION_(MAJOR|MINOR|PATCH)")
 
-foreach(ver ${_GMAT_version_defines})
+foreach(ver ${_GMAT_ver})
     if(ver MATCHES "#define GMATELASTOPLASTIC_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
-        set(_GMAT_VERSION_${CMAKE_MATCH_1}
-            "${CMAKE_MATCH_2}"
-            CACHE INTERNAL "")
+        set(_GMAT_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
     endif()
 endforeach()
 
@@ -31,6 +28,8 @@ message(STATUS "Building GMatElastoPlastic v${_GMAT_VERSION}")
 # ==========
 
 find_package(xtensor REQUIRED)
+find_package(GMatTensor REQUIRED)
+find_package(GMatElastic REQUIRED)
 
 add_library(GMatElastoPlastic INTERFACE)
 
@@ -38,7 +37,7 @@ target_include_directories(GMatElastoPlastic INTERFACE
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-target_link_libraries(GMatElastoPlastic INTERFACE xtensor)
+target_link_libraries(GMatElastoPlastic INTERFACE xtensor GMatTensor GMatElastic)
 
 # Installation
 # ============
@@ -80,6 +79,10 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GMatElastoPlastic.pc"
 
 include("GMatElastoPlasticConfig.cmake")
 
+set(CTEST_TEST_TARGET_ALIAS RUN_ALL_TESTS)
+include(CTest)
+
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(test)
 endif()

@@ -1,4 +1,4 @@
-import GMatElastoPlastic as gmat
+import GMatElastoPlastic.Cartesian3d as GMat
 import GooseMPL as gplt
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,15 +10,12 @@ plt.style.use(['goose', 'goose-latex'])
 def ddot42(A4, B2):
     return np.einsum('ijkl,lk->ij', A4, B2)
 
-def ddot22(A2, B2):
-    return np.einsum('ij,ji', A2, B2)
-
 def norm(A2):
     return np.abs(np.einsum('ij,ji', A2, A2))
 
 # define material model
 
-mat = gmat.Cartesian3d.LinearHardening(10.0, 1.0, 0.1, 0.2)
+mat = GMat.LinearHardening(10.0, 1.0, 0.1, 0.2)
 
 # pre-loading
 
@@ -34,7 +31,9 @@ for igamma, gamma in enumerate(np.linspace(0.0, 0.1, ninc)):
         [0.0, 0.0, 0.0],
     ])
 
-    Sig0, C4 = mat.Tangent(Eps0)
+    mat.setStrain(Eps0)
+    Sig0 = mat.Stress()
+    C4 = mat.Tangent()
 
 # consistency check
 
@@ -46,7 +45,8 @@ for i in range(len(x)):
     dEps = np.random.random((3, 3)) * x[i]
     dEps = 0.5 * (dEps + dEps.T)
 
-    Sig = mat.Stress(Eps0 + dEps)
+    mat.setStrain(Eps0 + dEps)
+    Sig = mat.Stress()
 
     dSig = Sig - Sig0
 
@@ -75,5 +75,5 @@ gplt.plot_powerlaw(+2, 0.5, 0.0, 0.5, axis=ax, units='relative', color='k', line
 
 ax.legend()
 
-plt.savefig('consistency.pdf')
+fig.savefig('consistency.pdf')
 plt.show()

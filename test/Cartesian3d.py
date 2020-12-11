@@ -1,67 +1,73 @@
-
-import GMatElastoPlastic.Cartesian3d as GMat
+import unittest
 import numpy as np
+import GMatElastoPlastic.Cartesian3d as GMat
 
-def EQ(a,b):
-  assert np.abs(a-b) < 1.e-12
+class Test_main(unittest.TestCase):
 
-def ALLEQ(a, b):
-  assert np.allclose(a, b)
+    def test_Elastic(self):
 
-K = 12.3
-G = 45.6
+        K = 12.3
+        G = 45.6
 
-gamma = 0.02
-epsm  = 0.12
+        gamma = 0.02
+        epsm = 0.12
 
-Eps = np.array(
-    [[epsm, gamma, 0.0],
-     [gamma, epsm, 0.0],
-     [0.0, 0.0, epsm]])
+        Eps = np.array(
+            [[epsm, gamma, 0.0],
+             [gamma, epsm, 0.0],
+             [0.0, 0.0, epsm]])
 
-# Elastic
+        Sig = np.array(
+            [[3.0 * K * epsm, 2.0 * G * gamma, 0.0],
+             [2.0 * G * gamma, 3.0 * K * epsm, 0.0],
+             [0.0, 0.0, 3.0 * K * epsm]])
 
-mat = GMat.Elastic(K, G)
-Sig = mat.Stress(Eps)
+        self.assertTrue(np.isclose(float(GMat.Epseq(Eps)), 2.0 / np.sqrt(3.0) * gamma))
 
-EQ(Sig[0,0], 3.0 * K * epsm)
-EQ(Sig[1,1], 3.0 * K * epsm)
-EQ(Sig[2,2], 3.0 * K * epsm)
-EQ(Sig[0,1], 2.0 * G * gamma)
-EQ(Sig[1,0], 2.0 * G * gamma)
-EQ(Sig[0,2], 0)
-EQ(Sig[1,2], 0)
-EQ(Sig[2,0], 0)
-EQ(Sig[2,1], 0)
+        mat = GMat.Elastic(K, G)
+        mat.setStrain(Eps)
 
-# Matrix
+        self.assertTrue(np.allclose(mat.Stress(), Sig))
 
-nelem = 2
-nip = 2
-mat = GMat.Matrix(nelem, nip)
+    def test_Array2d(self):
 
-I = np.ones([nelem, nip], dtype='int')
-mat.setElastic(I, K, G)
+        K = 12.3
+        G = 45.6
 
-eps = np.zeros((nelem, nip, 3, 3))
-for i in range(3):
-    for j in range(3):
-        eps[:, :, i, j] = Eps[i, j]
+        gamma = 0.02
+        epsm = 0.12
 
-sig = mat.Stress(eps)
+        Eps = np.array(
+            [[epsm, gamma, 0.0],
+             [gamma, epsm, 0.0],
+             [0.0, 0.0, epsm]])
 
-for e in range(nelem):
-    for q in range(nip):
+        Sig = np.array(
+            [[3.0 * K * epsm, 2.0 * G *gamma, 0.0],
+             [2.0 * G *gamma, 3.0 * K * epsm, 0.0],
+             [0.0, 0.0, 3.0 * K * epsm]])
 
-        EQ(sig[e,q,0,0], 3.0 * K * epsm)
-        EQ(sig[e,q,1,1], 3.0 * K * epsm)
-        EQ(sig[e,q,2,2], 3.0 * K * epsm)
-        EQ(sig[e,q,0,1], 2.0 * G * gamma)
-        EQ(sig[e,q,0,1], 2.0 * G * gamma)
+        nelem = 3
+        nip = 2
+        mat = GMat.Array2d([nelem, nip])
+        ndim = 3
 
-ALLEQ(sig[:,:,0,2], 0.0)
-ALLEQ(sig[:,:,1,2], 0.0)
-ALLEQ(sig[:,:,2,0], 0.0)
-ALLEQ(sig[:,:,2,1], 0.0)
+        I = np.ones([nelem, nip], dtype='int')
+        mat.setElastic(I, K, G)
 
-print('All checks passed')
+        eps = np.zeros((nelem, nip, ndim, ndim))
+        sig = np.zeros((nelem, nip, ndim, ndim))
+
+        for e in range(nelem):
+            for q in range(nip):
+                fac = float((e + 1) * nip + (q + 1))
+                eps[e, q, :, :] = fac * Eps
+                sig[e, q, :, :] = fac * Sig
+
+        mat.setStrain(eps)
+
+        self.assertTrue(np.allclose(mat.Stress(), sig))
+
+if __name__ == '__main__':
+
+    unittest.main()
