@@ -2,27 +2,10 @@
 #include <catch2/catch.hpp>
 #include <xtensor/xrandom.hpp>
 #include <GMatElastoPlastic/Cartesian3d.h>
+#include <GMatTensor/Cartesian3d.h>
 
 namespace GM = GMatElastoPlastic::Cartesian3d;
-
-template <class T, class S>
-S A4_ddot_B2(const T& A, const S& B)
-{
-    S C = xt::empty<double>({3, 3});
-    C.fill(0.0);
-
-    for (size_t i = 0; i < 3; i++) {
-        for (size_t j = 0; j < 3; j++) {
-            for (size_t k = 0; k < 3; k++) {
-                for (size_t l = 0; l < 3; l++) {
-                    C(i, j) += A(i, j, k, l) * B(l, k);
-                }
-            }
-        }
-    }
-
-    return C;
-}
+namespace GT = GMatTensor::Cartesian3d;
 
 TEST_CASE("GMatElastoPlastic::Cartesian3d", "Cartesian3d.h")
 {
@@ -56,13 +39,13 @@ TEST_CASE("GMatElastoPlastic::Cartesian3d", "Cartesian3d.h")
 
         xt::xtensor<double, 2> Eps = xt::random::randn<double>({3, 3});
         xt::xtensor<double, 4> Is = GM::I4s();
-        Eps = A4_ddot_B2(Is, Eps);
+        Eps = GT::A4_ddot_B2(Is, Eps);
 
         GM::Elastic mat(K, G);
         mat.setStrain(Eps);
         auto Sig = mat.Stress();
         auto C = mat.Tangent();
-        REQUIRE(xt::allclose(A4_ddot_B2(C, Eps), Sig));
+        REQUIRE(xt::allclose(GT::A4_ddot_B2(C, Eps), Sig));
     }
 
     SECTION("Array")

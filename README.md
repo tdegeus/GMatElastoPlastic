@@ -1,6 +1,6 @@
 # GMatElastoPlastic
 
-[![Travis](https://travis-ci.com/tdegeus/GMatElastoPlastic.svg?branch=master)](https://travis-ci.com/tdegeus/GMatElastoPlastic)
+[![CI](https://github.com/tdegeus/GMatElastoPlastic/workflows/CI/badge.svg)](https://github.com/tdegeus/GMatElastoPlastic/actions)
 
 Elasto-plastic material model.
 An overview of the theory can be found in `docs/readme.tex` 

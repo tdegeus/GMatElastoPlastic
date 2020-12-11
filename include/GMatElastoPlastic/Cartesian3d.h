@@ -17,6 +17,8 @@ namespace Cartesian3d {
 
 // Unit tensors
 
+using GMatTensor::Cartesian3d::O2;
+using GMatTensor::Cartesian3d::O4;
 using GMatTensor::Cartesian3d::I2;
 using GMatTensor::Cartesian3d::II;
 using GMatTensor::Cartesian3d::I4;

@@ -73,7 +73,7 @@ inline void LinearHardening::setStrainPtr(const T* arg, bool tangent)
 
     // decompose trial elastic strain
     auto Epsed = decltype(m_Epse)::from_shape(m_Epse.shape());
-    double epsem = GT::hydrostatic_deviatoric(m_Epse.data(), Epsed.data());
+    double epsem = GT::Hydrostatic_deviatoric(m_Epse.data(), Epsed.data());
 
     // trial stress
     double sigm = 3.0 * m_K * epsem;
