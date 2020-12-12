@@ -33,7 +33,14 @@ conveniently compiled to this [PDF](docs/readme.pdf).
         - [Optimisation](#optimisation)
     - [By hand](#by-hand)
     - [Using pkg-config](#using-pkg-config)
+- [Testing](#testing)
+    - [Basic testing](#basic-testing)
+    - [Extensive testing](#extensive-testing)
 - [References / Credits](#references--credits)
+- [Upgrading instructions](#upgrading-instructions)
+    - [Upgrading to >v0.2.*](#upgrading-to-v02)
+- [Change-log](#change-log)
+    - [v0.2.0](#v020)
 
 <!-- /MarkdownTOC -->
 
@@ -136,20 +143,21 @@ namespace GMat = GMatElastoPlastic::Cartesian3d;
 int main()
 {
     size_t ndim = 3;
-    
+
     // array, of shape [nelem, nip], of material points
     GMat::Array<2> array({nelem, nip});
 
     // set materials:
     // points where I(x,y) == 1 are assigned, points where I(x,y) == 0 are skipped
     // all points can only be assigned once
-    matrix.setElastic(I, K, G);
-    matrix.setLinearHardening(I, K, G, sigy0, H);
+    array.setElastic(I, K, G);
+    array.setLinearHardening(I, K, G, sigy0, H);
     ...
 
     // set strain tensor (follows e.g. from FEM discretisation)
     xt::xtensor<double,4> eps = xt::empty<double>({nelem, nip, ndim, ndim});
     ... 
+    array.setStrain(eps);
 
     // compute stress (allocate result)
     xt::xtensor<double,4> sig = array.Stress();
