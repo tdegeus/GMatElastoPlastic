@@ -28,14 +28,14 @@ jobs:
     - name: Basic GitHub action setup
       uses: actions/checkout@v2
 
-    - name: Set conda environment "test"
+    - name: Set conda environment "tests"
       uses: conda-incubator/setup-miniconda@v2
       with:
         mamba-version: "*"
         channels: conda-forge,defaults
         channel-priority: true
         environment-file: environment.yaml
-        activate-environment: test
+        activate-environment: tests
         auto-activate-base: false
 
     - name: Extending conda environment for testing
@@ -56,16 +56,16 @@ jobs:
         python setup.py install
 
     - name: Run Python tests
-      run: python ./test/Cartesian3d.py
+      run: python ./tests/Cartesian3d.py
 
     - name: Generate consistency data based on current commit
       if: runner.os == 'Linux'
       run: |
-        python test/compare_versions/Cartesian3d_generate.py
-        python test/compare_versions/Cartesian3d_check_main.py
+        python tests/compare_versions/Cartesian3d_generate.py
+        python tests/compare_versions/Cartesian3d_check_main.py
 
     - name: Check consistency with v0.1.0
       if: runner.os == 'Linux'
       run: |
         conda install -c conda-forge python=3.8.5 python-gmatelastoplastic=0.1.0
-        python test/compare_versions/Cartesian3d_check_v0.1.0.py
+        python tests/compare_versions/Cartesian3d_check_v0.1.0.py
