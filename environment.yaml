@@ -13,8 +13,6 @@ dependencies:
   - numpy
   - pybind11
   - python
-  - python-qpot
-  - qpot
   - scikit-build
   - setuptools_scm
   - xtensor
