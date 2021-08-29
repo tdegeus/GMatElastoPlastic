@@ -49,11 +49,12 @@ inline std::string version();
 
 /**
 Return versions of this library and of all of its dependencies.
-The output is a list of strings, e.g.
+The output is a list of strings:
 
-    "gmatelastoplasticqpot=0.7.0",
+    "gmatelastic=0.2.0",
+    "gmatelastoplastic=0.7.0",
+    "gmattensor=0.8.0",
     "xtensor=0.20.1"
-    ...
 
 \return List of strings.
 */
