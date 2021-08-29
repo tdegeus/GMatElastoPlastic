@@ -10,6 +10,7 @@
 #define FORCE_IMPORT_ARRAY
 #include <xtensor-python/pytensor.hpp>
 
+#include <GMatElastoPlastic/version.h>
 #include <GMatElastoPlastic/Cartesian3d.h>
 
 namespace py = pybind11;
