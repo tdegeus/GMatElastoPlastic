@@ -80,5 +80,5 @@ jobs:
       if: runner.os == 'Linux'
       working-directory: tests/compare_versions
       run: |
-        micromamba install -c conda-forge python=3.8.5 python-gmatelastoplasticqpot=0.1.0
+        micromamba install -c conda-forge python=3.8.5 python-gmatelastoplastic=0.1.0
         python Cartesian3d_check_v0.1.0.py
