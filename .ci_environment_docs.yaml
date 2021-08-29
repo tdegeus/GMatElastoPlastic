@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+dependencies:
+  - cmake
+  - doxygen
+  - gmattensor
+  - qpot
+  - setuptools_scm
+  - xtensor

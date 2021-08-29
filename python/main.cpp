@@ -5,11 +5,10 @@
 */
 
 #include <pybind11/pybind11.h>
-#include <pyxtensor/pyxtensor.hpp>
+#include <pybind11/stl.h>
 
-// Enable basic assertions on matrix shape
-// (doesn't cost a lot of time, but avoids segmentation faults)
-#define GMATELASTOPLASTIC_ENABLE_ASSERT
+#define FORCE_IMPORT_ARRAY
+#include <xtensor-python/pytensor.hpp>
 
 #include <GMatElastoPlastic/Cartesian3d.h>
 
@@ -148,8 +147,9 @@ void add_sigeq_overloads(T& module)
 }
 
 
-PYBIND11_MODULE(GMatElastoPlastic, m)
+PYBIND11_MODULE(_GMatElastoPlastic, m)
 {
+    xt::import_numpy();
 
     m.doc() = "Elasto-plastic material model";
 

@@ -9,12 +9,22 @@ on:
 
 jobs:
 
-  default-shell:
+  standard:
 
     strategy:
       fail-fast: false
       matrix:
         runs-on: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - runs-on: ubuntu-latest
+            config: -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=1 -DBUILD_EXAMPLES=1 -DBUILD_DOCS=0
+            prop: tests, examples & docs
+          - runs-on: macos-latest
+            config: -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=1
+            prop: tests
+          - runs-on: windows-latest
+            config: -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=1 -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+            prop: tests
 
     defaults:
       run:
@@ -28,44 +38,47 @@ jobs:
     - name: Basic GitHub action setup
       uses: actions/checkout@v2
 
-    - name: Set conda environment "tests"
-      uses: conda-incubator/setup-miniconda@v2
+    - name: Set conda environment
+      uses: mamba-org/provision-with-micromamba@main
       with:
-        mamba-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
         environment-file: environment.yaml
-        activate-environment: tests
-        auto-activate-base: false
+        environment-name: myenv
 
-    - name: Extending conda environment for testing
-      run: conda env update --file environment_test.yaml
+    - name: Set dummy version
+      run: echo "SETUPTOOLS_SCM_PRETEND_VERSION=0.0" >> $GITHUB_ENV
 
-    - name: Configure using CMake
-      run: cmake . -DBUILD_TESTS=1
+    - name: Install clang
+      if: runner.os == 'Windows'
+      run: micromamba install -c conda-forge clang_win-64 ninja
 
-    - name: Build C++ tests & examples
+    - name: Configure using CMake (!Windows)
+      run: cmake -Bbuild ${{ matrix.config }}
+
+    - name: Build C++ ${{ matrix.prop }}
+      working-directory: build
       run: cmake --build .
 
-    - name: Run C++ tests
-      run: cmake --build . --target "RUN_ALL_TESTS"
+    - name: Run C++ ${{ matrix.prop }}
+      working-directory: build
+      run: ctest --output-on-failure
 
     - name: Build and install Python module
-      run: |
-        python setup.py build
-        python setup.py install
+      run: python setup.py install --build-type Release -vv
 
     - name: Run Python tests
-      run: python ./tests/Cartesian3d.py
+      working-directory: tests
+      run: python Cartesian3d.py
 
     - name: Generate consistency data based on current commit
       if: runner.os == 'Linux'
+      working-directory: tests/compare_versions
       run: |
-        python tests/compare_versions/Cartesian3d_generate.py
-        python tests/compare_versions/Cartesian3d_check_main.py
+        python Cartesian3d_generate.py
+        python Cartesian3d_check_main.py
 
     - name: Check consistency with v0.1.0
       if: runner.os == 'Linux'
+      working-directory: tests/compare_versions
       run: |
-        conda install -c conda-forge python=3.8.5 python-gmatelastoplastic=0.1.0
-        python tests/compare_versions/Cartesian3d_check_v0.1.0.py
+        micromamba install -c conda-forge python=3.8.5 python-gmatelastoplasticqpot=0.1.0
+        python Cartesian3d_check_v0.1.0.py
