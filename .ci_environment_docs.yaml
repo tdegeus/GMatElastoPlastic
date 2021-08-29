@@ -3,7 +3,7 @@ channels:
 dependencies:
   - cmake
   - doxygen
+  - gmatelastic
   - gmattensor
-  - qpot
   - setuptools_scm
   - xtensor

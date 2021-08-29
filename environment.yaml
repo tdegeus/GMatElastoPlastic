@@ -6,9 +6,7 @@ dependencies:
   - doxygen
   - gmatelastic
   - gmattensor
-  - goosefem
   - h5py
-  - mathjax
   - ninja
   - numpy
   - pybind11
