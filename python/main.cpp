@@ -153,6 +153,14 @@ PYBIND11_MODULE(_GMatElastoPlastic, m)
 
     m.doc() = "Elasto-plastic material model";
 
+    m.def("version",
+          &GMatElastoPlastic::version,
+          "Return version string.");
+
+    m.def("version_dependencies",
+          &GMatElastoPlastic::version_dependencies,
+          "Return list of strings.");
+
     // -----------------------------
     // GMatElastoPlastic.Cartesian3d
     // -----------------------------
