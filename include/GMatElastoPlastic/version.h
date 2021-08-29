@@ -10,6 +10,8 @@ Version information.
 #define GMATELASTOPLASTIC_VERSION_H
 
 #include "config.h"
+#include <GMatElastic/version.h>
+#include <GMatTensor/version.h>
 
 /**
 Current version.
