@@ -1,17 +1,9 @@
 channels:
   - conda-forge
 dependencies:
-  - catch2
   - cmake
   - doxygen
   - gmatelastic
   - gmattensor
-  - h5py
-  - ninja
-  - numpy
-  - pybind11
-  - python
-  - scikit-build
   - setuptools_scm
   - xtensor
-  - xtensor-python

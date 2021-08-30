@@ -1,4 +1,4 @@
-
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 #include <xtensor/xrandom.hpp>
 #include <GMatElastoPlastic/Cartesian3d.h>
