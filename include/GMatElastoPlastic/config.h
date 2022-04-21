@@ -1,26 +1,68 @@
-/*
-
-(c - MIT) T.W.J. de Geus (Tom) | www.geus.me | github.com/tdegeus/GMatElastoPlastic
-
+/**
+\file
+\copyright Copyright. Tom de Geus. All rights reserved.
+\license This project is released under the MIT License.
 */
 
 #ifndef GMATELASTOPLASTIC_CONFIG_H
 #define GMATELASTOPLASTIC_CONFIG_H
 
-#ifdef GMATELASTOPLASTIC_ENABLE_ASSERT
+/**
+All assertions are implementation as:
 
-    #define GMATELASTOPLASTIC_ASSERT(expr) GMATELASTOPLASTIC_ASSERT_IMPL(expr, __FILE__, __LINE__)
-    #define GMATELASTOPLASTIC_ASSERT_IMPL(expr, file, line) \
-        if (!(expr)) { \
-            throw std::runtime_error( \
-                std::string(file) + ':' + std::to_string(line) + \
-                ": assertion failed (" #expr ") \n\t"); \
-        }
+    GMATELASTOPLASTIC_ASSERT(...)
+
+They can be enabled by:
+
+    #define GMATELASTOPLASTIC_ENABLE_ASSERT
+
+(before including GMatElastic).
+The advantage is that:
+
+-   File and line-number are displayed if the assertion fails.
+-   Assertions can be enabled/disabled independently from those of other libraries.
+
+\throw std::runtime_error
+*/
+#ifdef GMATELASTOPLASTIC_ENABLE_ASSERT
+#define GMATELASTOPLASTIC_ASSERT(expr) GMATTENSOR_ASSERT_IMPL(expr, __FILE__, __LINE__)
+#else
+#define GMATELASTOPLASTIC_ASSERT(expr)
+#endif
+
+/**
+Linear elastoplastic material model.
+*/
+namespace GMatElastoPlastic {
+
+/**
+Define container type.
+The default `xt::xtensor` can be changed using:
+
+-   `#define GMATELASTOPLASTIC_USE_XTENSOR_PYTHON` -> `xt::pytensor`
+*/
+namespace array_type {
+
+#ifdef GMATELASTOPLASTIC_USE_XTENSOR_PYTHON
+
+/**
+Fixed (static) rank array.
+*/
+template <typename T, size_t N>
+using tensor = xt::pytensor<T, N>;
 
 #else
 
-    #define GMATELASTOPLASTIC_ASSERT(expr)
+/**
+Fixed (static) rank array.
+*/
+template <typename T, size_t N>
+using tensor = xt::xtensor<T, N>;
 
 #endif
+
+} // namespace array_type
+
+} // namespace GMatElastoPlastic
 
 #endif

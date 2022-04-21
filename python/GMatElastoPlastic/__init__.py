@@ -1,1 +1,3 @@
-from ._GMatElastoPlastic import *
+import GMatTensor.Cartesian3d  # noqa: F401,F403
+
+from ._GMatElastoPlastic import *  # noqa: F401,F403
