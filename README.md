@@ -6,45 +6,6 @@ Elasto-plastic material model.
 An overview of the theory can be found in `docs/readme.tex`
 conveniently compiled to this [PDF](docs/readme.pdf).
 
-# Contents
-
-<!-- MarkdownTOC levels="1,2,3" -->
-
-- [Disclaimer](#disclaimer)
-- [Implementation](#implementation)
-    - [C++ and Python](#c-and-python)
-    - [Cartesian3d](#cartesian3d)
-        - [Overview](#overview)
-        - [Example](#example)
-        - [Function names](#function-names)
-        - [Storage](#storage)
-    - [Debugging](#debugging)
-- [Installation](#installation)
-    - [C++ headers](#c-headers)
-        - [Using conda](#using-conda)
-        - [From source](#from-source)
-    - [Python module](#python-module)
-        - [Using conda](#using-conda-1)
-        - [From source](#from-source-1)
-- [Compiling](#compiling)
-    - [Using CMake](#using-cmake)
-        - [Example](#example-1)
-        - [Targets](#targets)
-        - [Optimisation](#optimisation)
-    - [By hand](#by-hand)
-    - [Using pkg-config](#using-pkg-config)
-- [Testing](#testing)
-    - [Basic testing](#basic-testing)
-    - [Extensive testing](#extensive-testing)
-- [References / Credits](#references--credits)
-- [Upgrading instructions](#upgrading-instructions)
-    - [Upgrading to >v0.2.*](#upgrading-to-v02)
-- [Change-log](#change-log)
-    - [v0.2.1](#v021)
-    - [v0.2.0](#v020)
-
-<!-- /MarkdownTOC -->
-
 # Disclaimer
 
 This library is free to use under the
@@ -64,170 +25,117 @@ Download:
 T.W.J. de Geus (Tom) | tom@geus.me | www.geus.me |
 [github.com/tdegeus/GMatElastoPlastic](https://github.com/tdegeus/GMatElastoPlastic)
 
-# Implementation
+# Python implementation
 
-## C++ and Python
+## Partial example
 
-The code is a C++ header-only library (see [installation notes](#c-headers)),
-but a Python module is also provided (see [installation notes](#python-module)).
-The interfaces are identical except:
+```python
+import GMatElastoPlastic.Cartesian3d as GMat
 
-+   All *xtensor* objects (`xt::xtensor<...>`) are *NumPy* arrays in Python.
-    Overloading based on rank is also available in Python.
-+   The Python module cannot change output objects in-place:
-    only functions whose name starts with a capital letter are included, see below.
-+   All `::` in C++ are `.` in Python.
+shape = [...]
+K = np.empty(shape)
+G = np.empty(shape)
+sigy0 = np.empty(shape)
+H = np.empty(shape)
 
-## Cartesian3d
+GMat.LinearHarderningXd model(K, G, sigy0, H)
+...
 
-[Cartesian3d.h](include/GMatElastoPlastic/Cartesian3d.h)
+Eps = np.empty(shape + [3, 3])
+...
 
-### Overview
+model.Eps = Eps
+print(model.Sig)
 
-At the material point level different models are implemented with different classes:
+...
+model.increment()
+```
 
-+   `Elastic`: the elastic material model that corresponds to
-    the elastic part of the elasto-plastic material model.
-    Note: taken from *GMatElastic*.
-+   `LinearHardening`: the elasto-plastic material model with linear hardening.
+## Installation
 
-There is an `Array` class that allows you to combine all these material models and
-have a single API for an array of material points.
+### Using conda
 
->   Note that all strain tensors are presumed symmetric.
->   No checks are made to ensure this.
+```bash
+conda install -c conda-forge python-gmatelastoplastic
+```
 
-### Example
+Note that *xsimd* and hardware optimisations are **not enabled**.
+To enable them you have to compile on your system, as is discussed next.
 
-Only a partial examples are presented here, meant to understand the code's structure.
+### From source
 
-#### Individual material points
+>   You need *xtensor*, *xtensor-python* and optionally *xsimd* as prerequisites.
+>   The easiest is to use *conda* to get the prerequisites:
+>
+>   ```bash
+>   conda install -c conda-forge xtensor xsimd xtensor-python
+>   ```
+>
+>   If you then compile and install with the same environment you should be good to go.
+>   Otherwise, a bit of manual labour might be needed to treat the dependencies.
+
+```bash
+# Download GMatElastoPlastic
+git checkout https://github.com/tdegeus/GMatElastoPlastic.git
+cd GMatElastoPlastic
+
+# Only if you want to use hardware optimisation:
+export SKBUILD_CONFIGURE_OPTIONS="-DUSE_SIMD=1"
+
+python -m pip install . -v
+```
+
+# C++ implementation
+
+## Partial example
 
 ```cpp
-#include <GMatElastoPlastic/Cartesian3d.h>
+#include <GMatElastoPlastic.Cartesian3d.h>
 
 namespace GMat = GMatElastoPlastic::Cartesian3d;
 
 int main()
 {
-    // a single material point
-    GMat::Elastic elastic(K, G);
-    GMat::LinearHardening plastic(K, G, sigy0, H);
+    static const size_t rank = ...;
+
+    xt::xtensor<double, rank> K = ...;
+    xt::xtensor<double, rank> G = ...;
+    xt::xtensor<double, rank> sigy0 = ...;
+    xt::xtensor<double, rank> H = ...;
+
+    GMat::LinearHarderningXd model(K, G, sigy0, H);
     ...
 
-    // set strain (follows e.g. from FEM discretisation)
-    xt::xtensor<double, 2> Eps;
+    xt::xtensor<double, rank + 2> Eps;
     ...
-    elastic.setStrain(Eps);
-    plastic.setStrain(Eps);
 
-    // compute stress (including allocation of the result)
-    auto Sig = elastic.Stress();
-    auto Sig = plastic.Stress();
-    // OR compute stress without (re)allocating the results
-    // in this case "Sig" has to be of the correct type and shape
-    elastic.stress(Sig);
-    plastic.stress(Sig);
+    // all necessary computation are done at this point
+    model.set_Eps(Eps);
     ...
+
+    // get reference to stress
+    auto Sig = elastic.Sig();
+
+    // update history varibles for the next indcrement
+    model.increment();
 
     return 0;
 }
 ```
-
-#### Matrix of material points
-
-```cpp
-#include <GMatElastoPlastic/Cartesian3d.h>
-
-namespace GMat = GMatElastoPlastic::Cartesian3d;
-
-int main()
-{
-    size_t ndim = 3;
-
-    // array, of shape [nelem, nip], of material points
-    GMat::Array<2> array({nelem, nip});
-
-    // set materials:
-    // points where I(x,y) == 1 are assigned, points where I(x,y) == 0 are skipped
-    // all points can only be assigned once
-    array.setElastic(I, K, G);
-    array.setLinearHardening(I, K, G, sigy0, H);
-    ...
-
-    // set strain tensor (follows e.g. from FEM discretisation)
-    xt::xtensor<double,4> eps = xt::empty<double>({nelem, nip, ndim, ndim});
-    ...
-    array.setStrain(eps);
-
-    // compute stress (allocate result)
-    xt::xtensor<double,4> sig = array.Stress();
-    // OR compute stress without (re)allocating the results
-    // in this case "sig" has to be of the correct type and shape
-    array.stress(sig);
-    ...
-
-    return 0;
-}
-```
-
-### Function names
-
-+   Functions whose name starts with a capital letter (e.g. `Stress`)
-    return their result (allocating it internally).
-+   Functions whose name starts with a small letter (e.g. `stress`)
-    write to the, fully allocated, last input argument(s)
-    (avoiding re-allocation, but making the user responsible to do it properly).
-
-### Storage
-
-+   Scalar
-    ```cpp
-    double
-    ```
-    or
-    ```cpp
-    xt::xtensor<double, 0>
-    ```
-
-+   Tensors
-    ```cpp
-    xt:xtensor<double, 2> // 2nd-order tensor
-    xt:xtensor<double, 4> // 4th-order tensor
-    ```
-
-+   List *(i)* of second order tensors *(x,y)* : *A(i,x,y)*
-    ```cpp
-    xt::xtensor<double,3>
-    ```
-    Note that the shape is `[I, 3, 3]`.
-
-+   Matrix *(i,j)* of second order tensors *(x,y)* : *A(i,j,x,y)*
-    ```cpp
-    xt::xtensor<double,4>
-    ```
-    Note that the shape is `[I, J, 3, 3]`.
 
 ## Debugging
 
 To enable assertions define `GMATELASTOPLASTIC_ENABLE_ASSERT`
 **before** including *GMatElastoPlastic* for the first time.
 
-Using *CMake* this can be done using the `GMatElastoPlastic::assert` target
-(see [below](#using-cmake)).
+Using *CMake* this can be done using the `GMatElastoPlastic::assert` target.
 
 >   To also enable assertions of *xtensor* also define `XTENSOR_ENABLE_ASSERT`
 >   **before** including *xtensor* (and *GMatElastoPlastic*) for the first time.
 >
->   Using *CMake* all assertions are enabled using the `GMatElastoPlastic::debug` target
->   (see [below](#using-cmake)).
+>   Using *CMake* all assertions are enabled using the `GMatElastoPlastic::debug` target.
 
->   The library's assertions are enabled in the Python interface,
->   but debugging with *xtensor* is disabled.
-
-# Installation
-
-## C++ headers
+## Installation
 
 ### Using conda
 
@@ -242,57 +150,18 @@ conda install -c conda-forge gmatelastoplastic
 git checkout https://github.com/tdegeus/GMatElastoPlastic.git
 cd GMatElastoPlastic
 
-# Install headers, CMake and pkg-config support
-cmake .
-make install
+cmake -Bbuild
+cd build
+cmake --install .
 ```
 
-## Python module
-
-### Using conda
-
-```bash
-conda install -c conda-forge python-gmatelastoplasticfinitestrainsimo
-```
-
-Note that *xsimd* and hardware optimisations are **not enabled**.
-To enable them you have to compile on your system, as is discussed next.
-
-### From source
-
->   You need *xtensor*, *pyxtensor* and optionally *xsimd* as prerequisites.
->   Additionally, Python needs to know how to find them.
->   The easiest is to use *conda* to get the prerequisites:
->
->   ```bash
->   conda install -c conda-forge pyxtensor
->   conda install -c conda-forge xsimd
->   ```
->
->   If you then compile and install with the same environment
->   you should be good to go.
->   Otherwise, a bit of manual labour might be needed to
->   treat the dependencies.
-
-```bash
-# Download GMatElastoPlastic
-git checkout https://github.com/tdegeus/GMatElastoPlastic.git
-cd GMatElastoPlastic
-
-# Compile and install the Python module
-python setup.py build
-python setup.py install
-# OR you can use one command (but with less readable output)
-python -m pip install .
-```
-
-# Compiling
+## Compiling
 
 ## Using CMake
 
 ### Example
 
-Using *GMatElastoPlastic* your `CMakeLists.txt` can be as follows
+Your `CMakeLists.txt` can be as follows
 
 ```cmake
 cmake_minimum_required(VERSION 3.1)
@@ -307,7 +176,7 @@ target_link_libraries(example PRIVATE GMatElastoPlastic)
 The following targets are available:
 
 *   `GMatElastoPlastic`
-    Includes *GMatElastoPlastic* and the *GMatTensor*, *GMatElastic*, and *xtensor* dependencies.
+    Includes *GMatElastoPlastic* and the *GMatTensor*, *GMatElastoPlastic*, and *xtensor* dependencies.
 
 *   `GMatElastoPlastic::assert`
     Enables assertions by defining `GMATELASTOPLASTIC_ENABLE_ASSERT`.
@@ -321,7 +190,7 @@ The following targets are available:
 
 ### Optimisation
 
-It is advised to think about compiler optimization and enabling *xsimd*.
+It is advised to think about compiler optimisation and enabling *xsimd*.
 Using *CMake* this can be done using the `xtensor::optimize` and `xtensor::use_xsimd` targets.
 The above example then becomes:
 
@@ -336,7 +205,7 @@ target_link_libraries(example PRIVATE
     xtensor::use_xsimd)
 ```
 
-See the [documentation of xtensor](https://xtensor.readthedocs.io/en/latest/) concerning optimization.
+See the [documentation of xtensor](https://xtensor.readthedocs.io/en/latest/) concerning optimisation.
 
 ## By hand
 
@@ -360,51 +229,32 @@ c++ `pkg-config --cflags GMatElastoPlastic` ...
 Note that you have to take care of the *xtensor* dependency, the C++ version, optimization,
 enabling *xsimd*, ...
 
-# Testing
-
-## Basic testing
-
->   Run by the continuous integration
-
-```
-cd build
-cmake .. -DBUILD_TESTS=1
-make
-./test/unit-tests
-```
-
-## Extensive testing
-
->   Run by the continuous integration.
->   See [ci.yaml](.github/workflows/ci.yml) for details.
-
-To make sure that the current version in up-to-date with old versions,
-one starts by generating a set or random states using the current version:
-
-```
-cd test/compare_versions
-python Cartesian3d_generate.py
-```
-
-And then checks that the generated states are also found with previous
-versions:
-
-```
-git checkout tags/v0.1.0
-python setup.py build
-python setup.py install
-python Cartesian3d_check_v0.1.0.py
-```
-
-etc.
-
-See [ci.yaml](.github/workflows/ci.yml) for details.
-
-# References / Credits
-
-+   [xtensor](https://github.com/QuantStack/xtensor) is used under the hood.
-
 # Upgrading instructions
+
+## Upgrading to >v0.3.*
+
+The individual material point and the array of material points was fully integrated.
+In addition, the number of copies was reduced.
+
+### C++
+
+There is only a single class `LinearHarderning`. It's functions where renamed:
+
+*   `.setStrain(...)` -> `.set_Eps(...)`
+*   `.Stress()` -> `.Sig()` (now returns a reference).
+*   `.stress(...)`: deprecated.
+*   `.Tangent()` -> `.C()` (now returns a reference).
+*   `.tangent(...)`: deprecated.
+
+### Python
+
+There is only a single class `LinearHarderning`. It's functions are converted to properties:
+
+*   `.setStrain(...)` -> `.Eps = ...`
+*   `.Stress()` -> `.Sig` (now returns a reference).
+*   `.stress(...)`: deprecated.
+*   `.Tangent()` -> `.C` (now returns a reference).
+*   `.tangent(...)`: deprecated.
 
 ## Upgrading to >v0.2.*
 
@@ -443,6 +293,10 @@ This requires the following changes:
     - `tangent`: no argument, single return value (no longer returns stress).
 
 # Change-log
+
+## v0.3.0
+
+Complete API overhaul.
 
 ## v0.2.1
 

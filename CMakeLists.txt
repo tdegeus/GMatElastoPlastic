@@ -7,8 +7,7 @@ string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
 # Command-line options
 # ====================
 
-option(BUILD_ALL "${PROJECT_NAME}: Build tests, Python API & docs" OFF)
-option(BUILD_TESTS "${PROJECT_NAME}: Build tests" OFF)
+option(BUILD_ALL "${PROJECT_NAME}: Build Python API & docs" OFF)
 option(BUILD_PYTHON "${PROJECT_NAME}: Build Python API" OFF)
 option(BUILD_DOCS "${PROJECT_NAME}: Build docs" OFF)
 option(USE_ASSERT "${PROJECT_NAME}: Build with assertions" ON)
@@ -17,7 +16,6 @@ option(USE_SIMD "${PROJECT_NAME}: Build with hardware optimization" OFF)
 
 if(SKBUILD)
     set(BUILD_ALL 0)
-    set(BUILD_TESTS 0)
     set(BUILD_PYTHON 1)
     set(BUILD_DOCS 0)
 endif()
@@ -104,16 +102,6 @@ if(NOT SKBUILD)
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
-
-endif()
-
-# Build tests
-# ===========
-
-if(BUILD_TESTS OR BUILD_ALL)
-
-    enable_testing()
-    add_subdirectory(tests)
 
 endif()
 
@@ -218,6 +206,7 @@ if(BUILD_DOCS OR BUILD_ALL)
     set(DOXYGEN_JAVADOC_AUTOBRIEF YES)
     set(DOXYGEN_MACRO_EXPANSION YES)
     set(DOXYGEN_SOURCE_BROWSER YES)
+    set(DOXYGEN_GENERATE_XML YES)
     set(DOXYGEN_QUIET YES)
     set(DOXYGEN_WARN_IF_UNDOCUMENTED YES)
     set(DOXYGEN_WARN_AS_ERROR YES)
@@ -230,6 +219,6 @@ if(BUILD_DOCS OR BUILD_ALL)
 
     set(DOXYGEN_STRIP_FROM_INC_PATH ${${PROJECT_NAME}_DOCS_STRIP_INC})
     set(DOXYGEN_STRIP_FROM_PATH ${${PROJECT_NAME}_DOCS_STRIP})
-    doxygen_add_docs(docs ${${PROJECT_NAME}_DOCS_INCL})
+    doxygen_add_docs(html ${${PROJECT_NAME}_DOCS_INCL} "README.md")
 
 endif()
