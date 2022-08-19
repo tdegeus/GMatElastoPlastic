@@ -53,8 +53,16 @@ auto LinearHardening(T& cls)
     cls.def_property(
         "Eps",
         static_cast<xt::pytensor<double, S::rank + 2>& (S::*)()>(&S::Eps),
-        &S::template set_Eps<xt::pytensor<double, S::rank + 2>>,
+        static_cast<void (S::*)(const xt::pytensor<double, S::rank + 2>&)>(&S::set_Eps),
         "Strain tensor");
+
+    cls.def(
+        "set_Eps",
+        py::overload_cast<const xt::pytensor<double, S::rank + 2>&, bool>(
+            &S::template set_Eps<xt::pytensor<double, S::rank + 2>>),
+        "Overwrite strain tensor.",
+        py::arg("arg"),
+        py::arg("compute_tangent") = true);
 
     cls.def(
         "refresh", &S::refresh, "Recompute stress from strain.", py::arg("compute_tangent") = true);

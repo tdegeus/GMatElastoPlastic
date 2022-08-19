@@ -147,6 +147,21 @@ public:
     }
 
     /**
+    Set strain tensors.
+    Internally, this calls refresh() to update stress.
+    \tparam T e.g. `array_type::tensor<double, N + 2>`
+    \param arg Strain tensor per item [shape(), 3, 3].
+    \param compute_tangent Compute tangent.
+    */
+    template <class T>
+    void set_Eps(const T& arg, bool compute_tangent)
+    {
+        GMATELASTIC_ASSERT(xt::has_shape(arg, m_shape_tensor2));
+        std::copy(arg.cbegin(), arg.cend(), m_Eps.begin());
+        this->refresh(compute_tangent);
+    }
+
+    /**
     Recompute stress from strain.
     Calling set_Eps() will automatically call refresh().
 
