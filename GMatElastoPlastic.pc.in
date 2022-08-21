@@ -3,5 +3,5 @@ includedir=${prefix}/include
 
 Name: @PROJECT_NAME@
 Description: Elasto-plastic material model.
-Version: @GMATELASTOPLASTIC_VERSION@
+Version: @PROJECT_VERSION@
 Cflags: -I${includedir}

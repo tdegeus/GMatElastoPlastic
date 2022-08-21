@@ -7,14 +7,11 @@ try:
 except FileNotFoundError:
     pass
 
-# define material model
+# get response
 
 mat = GMat.LinearHardening0d(K=10.0, G=1.0, sigy0=0.1, H=0.2)
 
-# pre-loading
-
 ninc = 301
-
 epseq = np.zeros(ninc)
 sigeq = np.zeros(ninc)
 

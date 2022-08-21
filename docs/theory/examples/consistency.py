@@ -4,7 +4,10 @@ import GooseMPL as gplt
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.style.use(["goose", "goose-latex"])
+try:
+    plt.style.use(["goose", "goose-latex"])
+except FileNotFoundError:
+    pass
 
 
 def norm(A2):

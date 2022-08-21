@@ -10,8 +10,6 @@
 #include <GMatElastic/Cartesian3d.h>
 #include <GMatTensor/Cartesian3d.h>
 
-#include <xtensor/xio.hpp>
-
 #include "config.h"
 #include "version.h"
 
@@ -90,7 +88,7 @@ public:
         m_Epse_t = xt::zeros<double>(m_shape_tensor2);
         m_epsp = xt::zeros<double>(m_shape);
         m_epsp_t = xt::zeros<double>(m_shape);
-        m_Sig = xt::zeros<double>(m_shape_tensor2);
+        m_Sig = xt::empty<double>(m_shape_tensor2);
         m_C = xt::empty<double>(m_shape_tensor4);
 
         this->refresh(true); // initialise tangent (elastic)
@@ -188,12 +186,12 @@ public:
             double H;
             double epsp_t;
 
-            auto Eps = xt::adapt(&m_Eps.flat(0), {m_ndim, m_ndim});
-            auto Eps_t = xt::adapt(&m_Eps_t.flat(0), {m_ndim, m_ndim});
-            auto Epse = xt::adapt(&m_Epse.flat(0), {m_ndim, m_ndim});
-            auto Epse_t = xt::adapt(&m_Epse_t.flat(0), {m_ndim, m_ndim});
-            auto Sig = xt::adapt(&m_Sig.flat(0), {m_ndim, m_ndim});
-            auto C = xt::adapt(&m_C.flat(0), {m_ndim, m_ndim, m_ndim, m_ndim});
+            auto Eps = xt::adapt(m_Eps.data(), {m_ndim, m_ndim});
+            auto Eps_t = xt::adapt(m_Eps_t.data(), {m_ndim, m_ndim});
+            auto Epse = xt::adapt(m_Epse.data(), {m_ndim, m_ndim});
+            auto Epse_t = xt::adapt(m_Epse_t.data(), {m_ndim, m_ndim});
+            auto Sig = xt::adapt(m_Sig.data(), {m_ndim, m_ndim});
+            auto C = xt::adapt(m_C.data(), {m_ndim, m_ndim, m_ndim, m_ndim});
 
             auto Epsed = xt::empty_like(I);
 
