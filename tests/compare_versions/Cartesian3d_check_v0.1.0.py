@@ -8,7 +8,7 @@ import numpy as np
 class Test(unittest.TestCase):
     def test_main(self):
 
-        with h5py.File("Cartesian3d_random.hdf5", "r") as data:
+        with h5py.File("Cartesian3d_random.hdf5") as data:
 
             K = data["K"][...]
             G = data["G"][...]

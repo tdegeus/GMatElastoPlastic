@@ -16,6 +16,7 @@ Summary
    GMatElastoPlastic.Cartesian3d.LinearHardening0d
    GMatElastoPlastic.Cartesian3d.LinearHardening1d
    GMatElastoPlastic.Cartesian3d.LinearHardening2d
+   GMatElastoPlastic.Cartesian3d.LinearHardening3d
 
 Details
 -------

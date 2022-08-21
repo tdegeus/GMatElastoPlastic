@@ -64,9 +64,7 @@ jobs:
     - name: Generate consistency data based on current commit
       if: runner.os == 'Linux'
       working-directory: tests/compare_versions
-      run: |
-        python Cartesian3d_generate.py
-        python Cartesian3d_check_main.py
+      run: python Cartesian3d_generate.py
 
     - name: Check consistency with v0.1.0
       if: runner.os == 'Linux'
