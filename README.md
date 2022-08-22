@@ -1,10 +1,13 @@
 # GMatElastoPlastic
 
 [![CI](https://github.com/tdegeus/GMatElastoPlastic/workflows/CI/badge.svg)](https://github.com/tdegeus/GMatElastoPlastic/actions)
+[![Doxygen -> gh-pages](https://github.com/tdegeus/GMatElastoPlastic/workflows/gh-pages/badge.svg)](https://tdegeus.github.io/GMatElastoPlastic)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/gmatelastoplastic.svg)](https://anaconda.org/conda-forge/gmatelastoplastic)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/python-gmatelastoplastic.svg)](https://anaconda.org/conda-forge/python-gmatelastoplastic)
 
 Elasto-plastic material model.
-An overview of the theory can be found in `docs/readme.tex`
-conveniently compiled to this [PDF](docs/readme.pdf).
+An overview of the theory can be found in `docs/theory/readme.tex`
+conveniently compiled to this [PDF](docs/theory/readme.pdf).
 
 # Disclaimer
 
@@ -75,7 +78,6 @@ To enable them you have to compile on your system, as is discussed next.
 >   Otherwise, a bit of manual labour might be needed to treat the dependencies.
 
 ```bash
-# Download GMatElastoPlastic
 git checkout https://github.com/tdegeus/GMatElastoPlastic.git
 cd GMatElastoPlastic
 
@@ -114,7 +116,7 @@ int main()
     ...
 
     // get reference to stress
-    auto Sig = elastic.Sig();
+    auto Sig = model.Sig();
 
     // update history varibles for the next indcrement
     model.increment();
@@ -122,18 +124,6 @@ int main()
     return 0;
 }
 ```
-
-## Debugging
-
-To enable assertions define `GMATELASTOPLASTIC_ENABLE_ASSERT`
-**before** including *GMatElastoPlastic* for the first time.
-
-Using *CMake* this can be done using the `GMatElastoPlastic::assert` target.
-
->   To also enable assertions of *xtensor* also define `XTENSOR_ENABLE_ASSERT`
->   **before** including *xtensor* (and *GMatElastoPlastic*) for the first time.
->
->   Using *CMake* all assertions are enabled using the `GMatElastoPlastic::debug` target.
 
 ## Installation
 
@@ -146,7 +136,6 @@ conda install -c conda-forge gmatelastoplastic
 ### From source
 
 ```bash
-# Download GMatElastoPlastic
 git checkout https://github.com/tdegeus/GMatElastoPlastic.git
 cd GMatElastoPlastic
 
@@ -176,14 +165,13 @@ target_link_libraries(example PRIVATE GMatElastoPlastic)
 The following targets are available:
 
 *   `GMatElastoPlastic`
-    Includes *GMatElastoPlastic* and the *GMatTensor*, *GMatElastoPlastic*, and *xtensor* dependencies.
+    Includes the library and its dependencies.
 
 *   `GMatElastoPlastic::assert`
-    Enables assertions by defining `GMATELASTOPLASTIC_ENABLE_ASSERT`.
+    Enables IO-assertions by defining `GMATELASTOPLASTIC_ENABLE_ASSERT`.
 
 *   `GMatElastoPlastic::debug`
-    Enables all assertions by defining
-    `GMATELASTOPLASTIC_ENABLE_ASSERT` and `XTENSOR_ENABLE_ASSERT`.
+    Enables assertions of all dependencies.
 
 *   `GMatElastoPlastic::compiler_warings`
     Enables compiler warnings (generic).
@@ -198,6 +186,8 @@ The above example then becomes:
 cmake_minimum_required(VERSION 3.1)
 project(example)
 find_package(GMatElastoPlastic REQUIRED)
+find_package(xtensor REQUIRED)
+find_package(xsimd REQUIRED)
 add_executable(example example.cpp)
 target_link_libraries(example PRIVATE
     GMatElastoPlastic
@@ -205,7 +195,7 @@ target_link_libraries(example PRIVATE
     xtensor::use_xsimd)
 ```
 
-See the [documentation of xtensor](https://xtensor.readthedocs.io/en/latest/) concerning optimisation.
+See the [documentation of xtensor](https://xtensor.readthedocs.io/en/latest/).
 
 ## By hand
 
@@ -215,7 +205,7 @@ Presuming that the compiler is `c++`, compile using:
 c++ -I/path/to/GMatElastoPlastic/include ...
 ```
 
-Note that you have to take care of the *xtensor* dependency, the C++ version, optimization,
+Note that you have to take care of the *xtensor* dependency, the C++ version, optimisation,
 enabling *xsimd*, ...
 
 ## Using pkg-config
