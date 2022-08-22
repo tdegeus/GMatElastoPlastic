@@ -59,7 +59,6 @@ target_compile_definitions(${PROJECT_NAME} INTERFACE
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
-include(CTest)
 include("${PROJECT_NAME}Config.cmake")
 
 # Installation headers / CMake / pkg-config
