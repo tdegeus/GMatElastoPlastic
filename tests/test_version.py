@@ -1,14 +1,19 @@
 import unittest
+import setuptools_scm
 
-import GMatElastoPlastic as gmat
+import GMatElastoPlastic as GMat
 
 
 class Test_main(unittest.TestCase):
     """ """
 
+    def test_version(self):
+
+        self.assertEqual(setuptools_scm.get_version(), GMat.version())
+
     def test_version_dependencies(self):
 
-        deps = gmat.version_dependencies()
+        deps = GMat.version_dependencies()
         deps = [i.split("=")[0] for i in deps]
 
         self.assertTrue("gmatelastoplastic" in deps)
