@@ -5,7 +5,7 @@ dependencies:
 - cmake
 - doxygen
 - furo
-- gmatelastic >=0.4.0
+- gmatelastic >=0.5.1
 - gmattensor >=0.10.1
 - h5py
 - ninja
