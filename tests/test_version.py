@@ -1,5 +1,4 @@
 import unittest
-import setuptools_scm
 
 import GMatElastoPlastic as GMat
 
