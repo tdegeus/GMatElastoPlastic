@@ -12,6 +12,7 @@ dependencies:
 - numpy
 - pybind11
 - python
+- python-gmatelastic >=0.5.1
 - python-gmattensor >0.9.0
 - scikit-build
 - setuptools_scm
