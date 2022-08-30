@@ -52,6 +52,7 @@ if(NOT TARGET GMatElastoPlastic::assert)
     set_property(
         TARGET GMatElastoPlastic::assert
         PROPERTY INTERFACE_COMPILE_DEFINITIONS
+        GMATELASTIC_ENABLE_ASSERT
         GMATELASTOPLASTIC_ENABLE_ASSERT)
 endif()
 
